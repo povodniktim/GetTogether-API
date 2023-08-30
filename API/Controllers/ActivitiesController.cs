@@ -1,56 +1,54 @@
 ﻿using API.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : Controller
+    public class ActivitiesController : Controller
     {
         private readonly niktopler_getTogetherContext _context;
 
-        public UsersController(niktopler_getTogetherContext context)
+        public ActivitiesController(niktopler_getTogetherContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Users>> Get()
+        public async Task<ActionResult<Activities>> Get()
         {
-            return Ok(_context.Users);
+            return Ok(_context.Activities);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Users>> Create([FromBody] Users user)
+        public async Task<ActionResult<Activities>> Create([FromBody] Activities activity)
         {
-            if (!ModelState.IsValid) 
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(Get), new { id = user.ID }, user);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Users user)
-        {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             } 
 
-            if (id != user.ID)
+            _context.Activities.Add(activity);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(Get), new { id = activity.ID }, activity);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Activities activity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != activity.ID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            _context.Entry(activity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
             try
             {
@@ -62,33 +60,30 @@ namespace API.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Users>> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var activity = await _context.Activities.FindAsync(id);
+            if (activity == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
+            _context.Activities.Remove(activity);
             await _context.SaveChangesAsync();
 
-            return user;
+            return NoContent();
         }
 
         private bool Exists(int id)
         {
-            return _context.Users.Any(u => u.ID == id);
+            return _context.Activities.Any(e => e.ID == id);
         }
+
     }
 }
