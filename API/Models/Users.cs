@@ -7,21 +7,27 @@ public partial class Users
 {
     public int ID { get; set; }
 
-    public string? FirstName { get; set; }
+    public string firstName { get; set; } = null!;
 
-    public string? LastName { get; set; }
+    public string lastName { get; set; } = null!;
 
-    public string? Email { get; set; }
+    public string email { get; set; } = null!;
 
-    public string? Password { get; set; }
+    public DateTime createdAt { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public string? profileImageUrl { get; set; }
 
-    public DateTime? LastLoggedInAt { get; set; }
+    public string? googleID { get; set; }
 
-    public virtual ICollection<EventComments> EventComments { get; set; } = new List<EventComments>();
+    public string? facebookID { get; set; }
+
+    public string? twitterID { get; set; }
+
+    public string? appleID { get; set; }
 
     public virtual ICollection<EventParticipants> EventParticipants { get; set; } = new List<EventParticipants>();
 
     public virtual ICollection<Events> Events { get; set; } = new List<Events>();
+
+    public virtual ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
 }

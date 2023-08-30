@@ -7,25 +7,29 @@ public partial class Events
 {
     public int ID { get; set; }
 
-    public int OrganizerID { get; set; }
+    public int organizerID { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public int activityID { get; set; }
 
-    public string Title { get; set; } = null!;
+    public DateTime createdAt { get; set; }
 
-    public string Description { get; set; } = null!;
+    public string title { get; set; } = null!;
 
-    public DateTime Date { get; set; }
+    public string? description { get; set; }
 
-    public string? Location { get; set; }
+    public DateTime date { get; set; }
 
-    public int MaxParticipants { get; set; }
+    public string? location { get; set; }
 
-    public virtual ICollection<EventComments> EventComments { get; set; } = new List<EventComments>();
+    public int? maxParticipants { get; set; }
+
+    public string? visibility { get; set; }
 
     public virtual ICollection<EventParticipants> EventParticipants { get; set; } = new List<EventParticipants>();
 
-    public virtual ICollection<EventPhotos> EventPhotos { get; set; } = new List<EventPhotos>();
+    public virtual ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
 
-    public virtual Users Organizer { get; set; } = null!;
+    public virtual Activities activity { get; set; } = null!;
+
+    public virtual Users organizer { get; set; } = null!;
 }

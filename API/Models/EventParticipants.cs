@@ -7,11 +7,17 @@ public partial class EventParticipants
 {
     public int ID { get; set; }
 
-    public int EventID { get; set; }
+    public int participantID { get; set; }
 
-    public int ParticipantID { get; set; }
+    public int eventID { get; set; }
 
-    public virtual Events Event { get; set; } = null!;
+    public string? status { get; set; }
 
-    public virtual Users Participant { get; set; } = null!;
+    public DateTime? statusChangedAt { get; set; }
+
+    public virtual ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
+
+    public virtual Events _event { get; set; } = null!;
+
+    public virtual Users participant { get; set; } = null!;
 }
