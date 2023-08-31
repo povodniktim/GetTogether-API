@@ -1,18 +1,16 @@
 ﻿using API.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : Controller
+    public class EventsController : Controller
     {
         private readonly niktopler_getTogetherContext _context;
 
-        public UsersController(niktopler_getTogetherContext context)
+        public EventsController(niktopler_getTogetherContext context)
         {
             _context = context;
         }
@@ -20,37 +18,37 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<Users>> Get()
         {
-            return Ok(_context.Users);
+            return Ok(_context.Events);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Users>> Create([FromBody] Users user)
+        public async Task<ActionResult<Users>> Create([FromBody] Events _event)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Users.Add(user);
+            _context.Events.Add(_event);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = user.ID }, user);
+            return CreatedAtAction(nameof(Get), new { id = _event.ID }, _event);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Users user)
+        public async Task<IActionResult> Update(int id, [FromBody] Events _event)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            } 
+            }
 
-            if (id != user.ID)
+            if (id != _event.ID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            _context.Entry(_event).State = EntityState.Modified;
 
             try
             {
@@ -62,33 +60,29 @@ namespace API.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Users>> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var _event = await _context.Events.FindAsync(id);
+            if (_event == null)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
+            _context.Events.Remove(_event);
             await _context.SaveChangesAsync();
 
-            return user;
+            return NoContent();
         }
-
+        
         private bool Exists(int id)
         {
-            return _context.Users.Any(u => u.ID == id);
+            return _context.Events.Any(e => e.ID == id);
         }
     }
 }
