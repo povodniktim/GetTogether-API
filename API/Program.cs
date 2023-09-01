@@ -29,6 +29,8 @@ namespace API
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<BasicAuthMiddleware>();
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
