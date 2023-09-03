@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using API.Helpers;
 
 namespace API
 {
@@ -28,8 +29,8 @@ namespace API
             var uid = uidpwd[0];
             var pwd = uidpwd[1];
 
-            if (uid != Environment.GetEnvironmentVariable("API_USERNAME")
-                || pwd != Environment.GetEnvironmentVariable("API_PASSWORD"))
+            if (uid != EnvHelper.GetEnv(EnvVariable.ApiUsername)
+                || pwd != EnvHelper.GetEnv(EnvVariable.ApiPassword))
             {
                 context.Response.StatusCode = 401;
                 await context.Response.WriteAsync("Unathorized");
