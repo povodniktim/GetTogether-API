@@ -1,8 +1,6 @@
 ﻿using API.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace API.Controllers
 {
@@ -10,23 +8,23 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class UsersController : Controller
     {
-        private readonly niktopler_getTogetherContext _context;
+        private readonly GetTogetherContext _context;
 
-        public UsersController(niktopler_getTogetherContext context)
+        public UsersController(GetTogetherContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Users>> Get()
+        public async Task<ActionResult<User>> Get()
         {
             return Ok(_context.Users);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Users>> Create([FromBody] Users user)
+        public async Task<ActionResult<User>> Create([FromBody] User user)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -34,18 +32,18 @@ namespace API.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = user.ID }, user);
+            return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Users user)
+        public async Task<IActionResult> Update(int id, [FromBody] User user)
         {
-            if (!ModelState.IsValid) 
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            } 
+            }
 
-            if (id != user.ID)
+            if (id != user.Id)
             {
                 return BadRequest();
             }
@@ -72,7 +70,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Users>> Delete(int id)
+        public async Task<ActionResult<User>> Delete(int id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -88,7 +86,7 @@ namespace API.Controllers
 
         private bool Exists(int id)
         {
-            return _context.Users.Any(u => u.ID == id);
+            return _context.Users.Any(u => u.Id == id);
         }
     }
 }

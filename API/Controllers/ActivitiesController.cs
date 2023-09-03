@@ -8,21 +8,21 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ActivitiesController : Controller
     {
-        private readonly niktopler_getTogetherContext _context;
+        private readonly GetTogetherContext _context;
 
-        public ActivitiesController(niktopler_getTogetherContext context)
+        public ActivitiesController(GetTogetherContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Activities>> Get()
+        public async Task<ActionResult<Activity>> Get()
         {
             return Ok(_context.Activities);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Activities>> Create([FromBody] Activities activity)
+        public async Task<ActionResult<Activity>> Create([FromBody] Activity activity)
         {
             if (!ModelState.IsValid)
             {
@@ -32,23 +32,23 @@ namespace API.Controllers
             _context.Activities.Add(activity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = activity.ID }, activity);
+            return CreatedAtAction(nameof(Get), new { id = activity.Id }, activity);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Activities activity)
+        public async Task<IActionResult> Update(int id, [FromBody] Activity activity)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != activity.ID)
+            if (id != activity.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(activity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            _context.Entry(activity).State = EntityState.Modified;
 
             try
             {
@@ -82,7 +82,7 @@ namespace API.Controllers
 
         private bool Exists(int id)
         {
-            return _context.Activities.Any(e => e.ID == id);
+            return _context.Activities.Any(e => e.Id == id);
         }
 
     }

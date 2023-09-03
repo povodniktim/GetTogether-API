@@ -11,7 +11,7 @@ namespace API
             DotEnv.Load(dotenv);
 
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddDbContext<niktopler_getTogetherContext>();
+            builder.Services.AddDbContext<GetTogetherContext>();
 
             var config =
                 new ConfigurationBuilder()

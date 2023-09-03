@@ -1,9 +1,9 @@
 CREATE TABLE Users (
-    ID INT PRIMARY KEY,
+    ID INT PRIMARY KEY AUTO_INCREMENT,
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    createdAt DATETIME NOT NULL,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     profileImageUrl TEXT,
     googleID VARCHAR(255),
     facebookID VARCHAR(255),
@@ -12,15 +12,15 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Activities (
-    ID INT PRIMARY KEY,
+    ID INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE Events (
-    ID INT PRIMARY KEY,
+    ID INT PRIMARY KEY AUTO_INCREMENT,
     organizerID INT NOT NULL,
     activityID INT NOT NULL,
-    createdAt DATETIME NOT NULL,
+    createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     title VARCHAR(150) NOT NULL,
     description TEXT,
     date DATETIME NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE Events (
 );
 
 CREATE TABLE EventParticipants (
-    ID INT PRIMARY KEY,
+    ID INT PRIMARY KEY AUTO_INCREMENT,
     participantID INT NOT NULL,
     eventID INT NOT NULL,
     status ENUM ('going', 'maybe', 'not going'),
@@ -42,7 +42,7 @@ CREATE TABLE EventParticipants (
 );
 
 CREATE TABLE Notifications (
-    ID INT PRIMARY KEY,
+    ID INT PRIMARY KEY AUTO_INCREMENT,
     userID INT NOT NULL,
     eventID INT,
     participantID INT,

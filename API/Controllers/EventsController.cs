@@ -8,21 +8,21 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class EventsController : Controller
     {
-        private readonly niktopler_getTogetherContext _context;
+        private readonly GetTogetherContext _context;
 
-        public EventsController(niktopler_getTogetherContext context)
+        public EventsController(GetTogetherContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Users>> Get()
+        public async Task<ActionResult<Event>> Get()
         {
             return Ok(_context.Events);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Users>> Create([FromBody] Events _event)
+        public async Task<ActionResult<Event>> Create([FromBody] Event _event)
         {
             if (!ModelState.IsValid)
             {
@@ -32,18 +32,18 @@ namespace API.Controllers
             _context.Events.Add(_event);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = _event.ID }, _event);
+            return CreatedAtAction(nameof(Get), new { id = _event.Id }, _event);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Events _event)
+        public async Task<IActionResult> Update(int id, [FromBody] Event _event)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != _event.ID)
+            if (id != _event.Id)
             {
                 return BadRequest();
             }
@@ -82,7 +82,7 @@ namespace API.Controllers
         
         private bool Exists(int id)
         {
-            return _context.Events.Any(e => e.ID == id);
+            return _context.Events.Any(e => e.Id == id);
         }
     }
 }
