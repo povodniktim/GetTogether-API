@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using API.Helpers;
 
 namespace API.Models;
 
@@ -20,7 +21,7 @@ public partial class GetTogetherContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseMySql("name=ConnectionStrings:niktopler_GetTogether", ServerVersion.Parse("10.6.15-mariadb"));
+        => optionsBuilder.UseMySql(EnvHelper.GetDatabaseConnectionString(), ServerVersion.Parse(EnvHelper.GetEnv(EnvVariable.DbVersion)));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
