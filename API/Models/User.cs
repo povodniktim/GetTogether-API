@@ -22,6 +22,8 @@ public partial class User
 
     public string? AppleId { get; set; }
 
+    public string? RefreshToken { get; set; }
+
     public virtual ICollection<EventParticipant> EventParticipants { get; set; } = new List<EventParticipant>();
 
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();

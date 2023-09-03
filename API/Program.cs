@@ -1,4 +1,5 @@
 using API.Models;
+using API.Middlewares;
 
 namespace API
 {
@@ -30,6 +31,7 @@ namespace API
             }
 
             app.UseMiddleware<BasicAuthMiddleware>();
+            app.UseMiddleware<TokenValidationMiddleware>();
 
             app.UseHttpsRedirection();
 
