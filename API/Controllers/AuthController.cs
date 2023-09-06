@@ -1,5 +1,6 @@
 using API.Helpers;
 using API.Models;
+using API.Responses;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +24,12 @@ namespace API.Controllers.Auth
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(
+                    new ErrorResponse<object>(
+                        ModelState.Values.ToArray(),
+                        "Invalid user data"
+                    )
+                );
             }
 
             var targetUser = _userService.GetByEmail(user.Email);
@@ -48,11 +54,12 @@ namespace API.Controllers.Auth
 
             Response.Cookies.Append("refreshToken", encryptedRefreshToken, cookieOptions);
 
-            return Ok(new
-            {
-                success = true,
-                accessToken = tokens.AccessToken
-            });
+            return Ok(
+                new SuccessResponse<AuthResponse>(
+                    new AuthResponse(tokens.AccessToken)
+                )
+            );
+
         }
 
         [HttpGet("sign-out")]
@@ -61,11 +68,12 @@ namespace API.Controllers.Auth
             string? accessToken = HttpContext.Request.Query["access-token"];
             if (string.IsNullOrWhiteSpace(accessToken))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Access token is required"
-                });
+                return BadRequest(
+                    new ErrorResponse<string>(
+                        new string[] { "Access token is required" },
+                        "Sign out has failed"
+                    )
+                );
             }
 
             var userPayload = TokenService.GetAuthTokenPayload(accessToken);
@@ -73,11 +81,12 @@ namespace API.Controllers.Auth
 
             Response.Cookies.Delete("refreshToken");
 
-            return Ok(new
-            {
-                success = true,
-                message = "Signed out successfully"
-            });
+            return Ok(
+                new SuccessResponse<string?>(
+                    null,
+                    "Signed out successfully"
+                )
+            );
 
         }
     }

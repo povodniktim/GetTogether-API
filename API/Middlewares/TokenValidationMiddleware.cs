@@ -1,6 +1,7 @@
 using API.Services;
 using API.Helpers;
 using API.Models;
+using API.Responses;
 
 namespace API.Middlewares
 {
@@ -26,12 +27,12 @@ namespace API.Middlewares
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await httpContext.Response.WriteAsJsonAsync(new
-                {
-                    success = false,
-                    message = "Unauthorized",
-                    description = "Missing access token"
-                });
+                await httpContext.Response.WriteAsJsonAsync(
+                    new ErrorResponse<string>(
+                        new string[] { "Missing access token" },
+                        "Unauthorized"
+                    )
+                );
                 return;
             }
 
@@ -45,12 +46,12 @@ namespace API.Middlewares
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
                 httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await httpContext.Response.WriteAsJsonAsync(new
-                {
-                    success = false,
-                    message = "Unauthorized",
-                    description = "Missing access token"
-                });
+                await httpContext.Response.WriteAsJsonAsync(
+                    new ErrorResponse<string>(
+                        new string[] { "Missing access token" },
+                        "Unauthorized"
+                    )
+                );
 
                 return;
             }
@@ -75,25 +76,25 @@ namespace API.Middlewares
 
                     httpContext.Response.Cookies.Append("refreshToken", encryptedRefreshToken, cookieOptions);
                     httpContext.Response.StatusCode = StatusCodes.Status200OK;
-                    await httpContext.Response.WriteAsJsonAsync(new
-                    {
-                        success = false,
-                        message = "Unauthorized",
-                        accessToken = tokens.AccessToken
-                    });
+                    await httpContext.Response.WriteAsJsonAsync(
+                        new ErrorResponse<AuthResponse>(
+                            new string[] { "Access token has expired" },
+                            "Unauthorized",
+                            new AuthResponse(tokens.AccessToken)
+                        )
+                    );
 
                     return;
                 }
             }
 
             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await httpContext.Response.WriteAsJsonAsync(new
-            {
-                success = false,
-                message = "Unauthorized",
-                callbackPath = "/auth/sign-in",
-                description = "Access token has expired or is invalid",
-            });
+            await httpContext.Response.WriteAsJsonAsync(
+                new ErrorResponse<string>(
+                    new string[] { "Access token has expired or is invalid" },
+                    "Unauthorized"
+                )
+            );
         }
 
     }
