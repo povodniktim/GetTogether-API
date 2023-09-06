@@ -16,9 +16,36 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Event>> Get()
+        public async Task<ActionResult<IEnumerable<Event>>> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string filter = "")
         {
-            return Ok(_context.Events);
+            IQueryable<Event> query = _context.Events;
+
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                query = query.Where(e =>
+                    e.Title.Contains(filter) ||
+                    e.Description.Contains(filter) ||
+                    e.Date.ToString().Contains(filter) ||
+                    e.Location.Contains(filter)
+                );
+            }
+
+            int totalItems = await query.CountAsync();
+
+            int skip = (page - 1) * pageSize;
+            query = query.Skip(skip).Take(pageSize);
+
+            var events = await query.ToListAsync();
+
+            var response = new
+            {
+                TotalItems = totalItems,
+                Page = page,
+                PageSize = pageSize,
+                Items = events
+            };
+
+            return Ok(response);
         }
 
         [HttpPost]
@@ -79,7 +106,7 @@ namespace API.Controllers
 
             return NoContent();
         }
-        
+
         private bool Exists(int id)
         {
             return _context.Events.Any(e => e.Id == id);
