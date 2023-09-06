@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using API.Helpers;
+﻿using API.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Models;
 
@@ -175,6 +175,9 @@ public partial class GetTogetherContext : DbContext
             entity.Property(e => e.ProfileImageUrl)
                 .HasColumnType("text")
                 .HasColumnName("profileImageUrl");
+            entity.Property(e => e.RefreshToken)
+                .HasColumnType("text")
+                .HasColumnName("refreshToken");
             entity.Property(e => e.TwitterId)
                 .HasMaxLength(255)
                 .HasColumnName("twitterID");

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using API.Helpers;
 
-namespace API
+namespace API.Middlewares
 {
     public class BasicAuthMiddleware
     {
