@@ -1,4 +1,5 @@
 using API.Helpers;
+using API.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -59,6 +60,27 @@ namespace API.Services
                 return false;
             }
 
+        }
+
+        public static AuthTokenPayload GetAuthTokenPayload(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = tokenHandler.ReadJwtToken(token);
+
+            var claims = jwtSecurityToken.Claims
+                .Where(claim => !string.IsNullOrEmpty(claim.Type))
+                .ToDictionary(claim => claim.Type, claim => claim.Value);
+
+            return new AuthTokenPayload
+            {
+                UserId = claims.ContainsKey("UserId") ? claims["UserId"] : null,
+                Email = claims.ContainsKey("Email") ? claims["Email"] : null,
+                Issuer = claims.ContainsKey("iss") ? claims["iss"] : null,
+                Audience = claims.ContainsKey("aud") ? claims["aud"] : null,
+                IssuedAt = DateTime.UnixEpoch.AddSeconds(claims.ContainsKey("iat") ? Convert.ToDouble(claims["iat"]) : 0),
+                Expiration = DateTime.UnixEpoch.AddSeconds(claims.ContainsKey("exp") ? Convert.ToDouble(claims["exp"]) : 0),
+                Subject = claims.ContainsKey("sub") ? claims["sub"] : null
+            };
         }
 
     }

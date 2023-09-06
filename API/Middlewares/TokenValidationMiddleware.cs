@@ -6,7 +6,7 @@ namespace API.Middlewares
 {
     class TokenValidationMiddleware
     {
-
+        private readonly string[] _pathsToSkip = { "/api/auth/sign-in" };
         private readonly RequestDelegate _next;
 
         public TokenValidationMiddleware(RequestDelegate next)
@@ -16,7 +16,7 @@ namespace API.Middlewares
 
         public async Task Invoke(HttpContext httpContext, GetTogetherContext context)
         {
-            if (httpContext.Request.Path.StartsWithSegments("/api/auth"))
+            if (_pathsToSkip.Any(path => httpContext.Request.Path.StartsWithSegments(path)))
             {
                 await _next(httpContext);
                 return;
@@ -62,7 +62,7 @@ namespace API.Middlewares
                 var user = userService.GetByRefreshToken(refreshToken);
                 if (user != null)
                 {
-                    var userPayload = UserService.GetTokenPayloadFromUser(user);
+                    var userPayload = ParseHelper.ParseObjToDictionary(UserService.GetTokenPayloadFromUser(user));
                     var tokens = TokenHelper.GenerateRefreshAndAccessTokens(userPayload, userPayload);
                     var encryptedRefreshToken = CryptoService.Encrypt(tokens.RefreshToken, EnvHelper.GetEnv(EnvVariable.EncryptionSecret));
                     userService.UpdateRefreshToken(user.Email, encryptedRefreshToken);
