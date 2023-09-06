@@ -32,7 +32,7 @@ namespace API.Controllers.Auth
                 targetUser = _userService.Create(user);
             }
 
-            var userPayload = UserService.GetTokenPayloadFromUser(targetUser);
+            var userPayload = ParseHelper.ParseObjToDictionary(UserService.GetTokenPayloadFromUser(targetUser));
 
             var tokens = TokenHelper.GenerateRefreshAndAccessTokens(userPayload, userPayload);
 
@@ -43,7 +43,7 @@ namespace API.Controllers.Auth
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = EnvHelper.IsProduction(),
+                Secure = EnvHelper.IsProduction()
             };
 
             Response.Cookies.Append("refreshToken", encryptedRefreshToken, cookieOptions);
@@ -55,6 +55,31 @@ namespace API.Controllers.Auth
             });
         }
 
+        [HttpGet("sign-out")]
+        public async Task<ActionResult<dynamic>> SignOut()
+        {
+            string? accessToken = HttpContext.Request.Query["access-token"];
+            if (string.IsNullOrWhiteSpace(accessToken))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Access token is required"
+                });
+            }
+
+            var userPayload = TokenService.GetAuthTokenPayload(accessToken);
+            _userService.UpdateRefreshToken(userPayload.Email, null);
+
+            Response.Cookies.Delete("refreshToken");
+
+            return Ok(new
+            {
+                success = true,
+                message = "Signed out successfully"
+            });
+
+        }
     }
 
 }

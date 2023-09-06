@@ -1,5 +1,4 @@
 using API.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
@@ -28,7 +27,7 @@ namespace API.Services
             return user;
         }
 
-        public void UpdateRefreshToken(string email, string encryptedRefreshToken)
+        public void UpdateRefreshToken(string email, string? encryptedRefreshToken)
         {
             var user = GetByEmail(email);
             if (user == null)
@@ -40,12 +39,12 @@ namespace API.Services
             _context.SaveChanges();
         }
 
-        public static Dictionary<string, string> GetTokenPayloadFromUser(User user)
+        public static UserTokenInfo GetTokenPayloadFromUser(User user)
         {
-            return new Dictionary<string, string>
+            return new UserTokenInfo
             {
-                { "userId", user.Id.ToString() },
-                { "email", user.Email }
+                UserId = user.Id.ToString(),
+                Email = user.Email
             };
         }
 
