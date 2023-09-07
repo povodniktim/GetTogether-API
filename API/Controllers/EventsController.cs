@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using API.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,17 +17,23 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string filter = "")
+        public async Task<ActionResult<IEnumerable<Event>>> Get(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? filter = null
+        )
         {
             IQueryable<Event> query = _context.Events;
 
             if (!string.IsNullOrWhiteSpace(filter))
             {
+                var filterLower = filter.ToLower();
+
                 query = query.Where(e =>
-                    e.Title.Contains(filter) ||
-                    e.Description.Contains(filter) ||
-                    e.Date.ToString().Contains(filter) ||
-                    e.Location.Contains(filter)
+                    e.Title.ToLower().Contains(filterLower) ||
+                    e.Description.ToLower().Contains(filterLower) ||
+                    e.Date.ToString().Contains(filterLower) ||
+                    e.Location.ToLower().Contains(filterLower)
                 );
             }
 
@@ -35,17 +42,21 @@ namespace API.Controllers
             int skip = (page - 1) * pageSize;
             query = query.Skip(skip).Take(pageSize);
 
-            var events = await query.ToListAsync();
+            var events = query.ToList();
 
-            var response = new
-            {
-                TotalItems = totalItems,
-                Page = page,
-                PageSize = pageSize,
-                Items = events
-            };
+            return Ok(
+                new SuccessResponse<GetMultipleResponse<Event>>(
+                    new GetMultipleResponse<Event>
+                    {
+                        Count = totalItems,
+                        Page = page,
+                        PerPage = pageSize,
+                        Collection = events
+                    },
+                    "List of all events"
+                )
+            );
 
-            return Ok(response);
         }
 
         [HttpPost]

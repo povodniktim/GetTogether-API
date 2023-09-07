@@ -1,4 +1,5 @@
 ﻿using API.Models;
+using API.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,9 +17,34 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Activity>> Get()
+        public async Task<ActionResult<Activity>> Get(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
-            return Ok(_context.Activities);
+            IQueryable<Activity> query = _context.Activities;
+
+            int skip = (page - 1) * pageSize;
+
+            query = query
+                .Skip(skip)
+                .Take(pageSize);
+
+            var activities = query.ToList();
+
+            return Ok(
+                new SuccessResponse<GetMultipleResponse<Activity>>(
+                    new GetMultipleResponse<Activity>
+                    {
+                        Count = await query.CountAsync(),
+                        Collection = activities,
+                        Page = page,
+                        PerPage = pageSize
+                    },
+                    "List of all activities"
+                )
+            );
+
         }
 
         [HttpPost]
@@ -27,7 +53,7 @@ namespace API.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            } 
+            }
 
             _context.Activities.Add(activity);
             await _context.SaveChangesAsync();
