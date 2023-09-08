@@ -47,6 +47,19 @@ namespace API.Controllers
 
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<Activity>> GetById([FromRoute] int id)
+        {
+
+            var activity = await _context.Activities.FindAsync(id);
+
+            if (activity == null)
+                return NotFound();
+
+            return Ok(activity);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Activity>> Create([FromBody] Activity activity)
         {

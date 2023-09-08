@@ -59,6 +59,19 @@ namespace API.Controllers
 
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<Event>> GetById([FromRoute] int id)
+        {
+
+            var _event = await _context.Events.FindAsync(id);
+
+            if (_event == null)
+                return NotFound();
+
+            return Ok(_event);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Event>> Create([FromBody] Event _event)
         {
