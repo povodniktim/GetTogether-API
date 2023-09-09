@@ -3,6 +3,7 @@ using API.Responses;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Jose.Compact;
 
 namespace API.Controllers
 {
@@ -32,6 +33,19 @@ namespace API.Controllers
                     "List of all users"
                 )
             );
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult<User>> GetById([FromRoute] int id)
+        {
+
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(user);
         }
 
         [HttpPost]
@@ -112,6 +126,7 @@ namespace API.Controllers
         public async Task<ActionResult<User>> Delete(int id)
         {
             var user = await _context.Users.FindAsync(id);
+
             if (user == null)
             {
                 return NotFound(
