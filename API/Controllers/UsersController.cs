@@ -42,10 +42,22 @@ namespace API.Controllers
 
             var user = await _context.Users.FindAsync(id);
 
-            if (user == null)
-                return NotFound();
+            if (user == null) 
+            {
+                return NotFound(
+                    new ErrorResponse<string>(
+                        new string[] { "User not found" },
+                        "Invalid user data"
+                    )
+                );
+            }
 
-            return Ok(user);
+            return Ok(
+                new SuccessResponse<User>(
+                    user,
+                    "User with id=" + user.Id
+                )
+            );
         }
 
         [HttpPost]

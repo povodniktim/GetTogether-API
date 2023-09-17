@@ -19,16 +19,16 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<Activity>> Get(
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10
+            [FromQuery] int perPage = 10
         )
         {
             IQueryable<Activity> query = _context.Activities;
 
-            int skip = (page - 1) * pageSize;
+            int skip = (page - 1) * perPage;
 
             query = query
                 .Skip(skip)
-                .Take(pageSize);
+                .Take(perPage);
 
             var activities = query.ToList();
 
@@ -39,7 +39,7 @@ namespace API.Controllers
                         Count = await query.CountAsync(),
                         Collection = activities,
                         Page = page,
-                        PerPage = pageSize
+                        PerPage = perPage
                     },
                     "List of all activities"
                 )
