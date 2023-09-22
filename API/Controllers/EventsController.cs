@@ -19,7 +19,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> Get(
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
+            [FromQuery] int perPage = 10,
             [FromQuery] string? filter = null
         )
         {
@@ -37,10 +37,10 @@ namespace API.Controllers
                 );
             }
 
-            int totalItems = await query.CountAsync();
+            int count = await query.CountAsync();
 
-            int skip = (page - 1) * pageSize;
-            query = query.Skip(skip).Take(pageSize);
+            int skip = (page - 1) * perPage;
+            query = query.Skip(skip).Take(perPage);
 
             var events = query.ToList();
 
@@ -48,9 +48,9 @@ namespace API.Controllers
                 new SuccessResponse<GetMultipleResponse<Event>>(
                     new GetMultipleResponse<Event>
                     {
-                        Count = totalItems,
+                        Count = count,
                         Page = page,
-                        PerPage = pageSize,
+                        PerPage = perPage,
                         Collection = events
                     },
                     "List of all events"
