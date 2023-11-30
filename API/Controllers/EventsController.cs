@@ -23,6 +23,12 @@ namespace API.Controllers
         [FromQuery] string? filter = null
 )
         {
+
+            if (page < 1)
+            {
+                page = 1;
+            }
+
             IQueryable<Event> query = _context.Events.Include(e => e.Organizer);
 
             if (!string.IsNullOrWhiteSpace(filter))
