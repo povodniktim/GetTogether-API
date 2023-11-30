@@ -1,5 +1,4 @@
 using API.Models;
-using API.Middlewares;
 
 namespace API
 {
@@ -20,8 +19,8 @@ namespace API
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   policy =>
                                   {
-                                        policy.WithOrigins("http://localhost:3000");
-                                        policy.AllowAnyHeader();
+                                      policy.WithOrigins("https://api-gettogether.azurewebsites.net");
+                                      policy.AllowAnyHeader();
                                   });
             });
 
@@ -41,8 +40,8 @@ namespace API
                 app.UseSwaggerUI();
             }
 
-            app.UseMiddleware<BasicAuthMiddleware>();
-            app.UseMiddleware<TokenValidationMiddleware>();
+            //app.UseMiddleware<BasicAuthMiddleware>();
+            //app.UseMiddleware<TokenValidationMiddleware>();
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseHttpsRedirection();

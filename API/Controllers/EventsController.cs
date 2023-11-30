@@ -18,12 +18,12 @@ namespace API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> Get(
-            [FromQuery] int page = 1,
-            [FromQuery] int perPage = 10,
-            [FromQuery] string? filter = null
-        )
+        [FromQuery] int page = 1,
+        [FromQuery] int perPage = 10,
+        [FromQuery] string? filter = null
+)
         {
-            IQueryable<Event> query = _context.Events;
+            IQueryable<Event> query = _context.Events.Include(e => e.Organizer);
 
             if (!string.IsNullOrWhiteSpace(filter))
             {
@@ -56,7 +56,6 @@ namespace API.Controllers
                     "List of all events"
                 )
             );
-
         }
 
         [HttpGet]

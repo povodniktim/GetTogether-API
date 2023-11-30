@@ -38,5 +38,4 @@ namespace API.Helpers
             return "Server = " + GetEnv(EnvVariable.DbServer) + "; Port = " + GetEnv(EnvVariable.DbPort) + "; Database = " + GetEnv(EnvVariable.DbName) + "; Uid = " + GetEnv(EnvVariable.DbUsername) + "; Pwd = " + GetEnv(EnvVariable.DbPassword) + ";";
         }
     }
-
 }
