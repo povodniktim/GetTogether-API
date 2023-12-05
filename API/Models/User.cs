@@ -32,4 +32,6 @@ public partial class User
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ICollection<UserInterest> UserInterests { get; set; } = new List<UserInterest>();
 }
