@@ -20,8 +20,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<Event>>> Get(
         [FromQuery] int page = 1,
         [FromQuery] int perPage = 10,
-        [FromQuery] string? filter = null
-)
+        [FromQuery] string? filter = null)
         {
 
             if (page < 1)
