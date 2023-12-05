@@ -20,6 +20,9 @@ public partial class GetTogetherContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserInterest> UserInterest { get; set; }
+    public virtual DbSet<Interest> Interest { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseMySql(EnvHelper.GetDatabaseConnectionString(), ServerVersion.Parse(EnvHelper.GetEnv(EnvVariable.DbVersion)));
 
