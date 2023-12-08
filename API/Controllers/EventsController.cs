@@ -77,17 +77,51 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Event>> Create([FromBody] Event _event)
+        public async Task<ActionResult<Event>> Create([FromBody] EventRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Events.Add(_event);
+            var existingOrganizer = await _context.Users
+                .Include(u => u.Events)
+                .FirstOrDefaultAsync(u => u.Id == request.OrganizerId);
+
+            var existingActivity = await _context.Activities
+                .Include(a => a.Events)
+                .FirstOrDefaultAsync(a => a.Id == request.ActivityId);
+
+            if (existingOrganizer == null || existingActivity == null)
+            {
+                return NotFound();
+            }
+
+            var newEvent = new Event
+            {
+                Title = request.Title,
+                OrganizerId = request.OrganizerId,
+                ActivityId = request.ActivityId,
+                Description = request.Description,
+                Date = request.Date,
+                Location = request.Location,
+                MaxParticipants = request.MaxParticipants,
+                Visibility = request.Visibility,
+                Organizer = existingOrganizer,
+                Activity = existingActivity
+            };
+
+            _context.Events.Add(newEvent);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = _event.Id }, _event);
+            return Ok(
+                new SuccessResponse<GetSingleResponse<Event>>(
+                    new GetSingleResponse<Event>
+                    {
+                        Item = newEvent
+                    }
+                )
+            );
         }
 
         [HttpPut("{id}")]

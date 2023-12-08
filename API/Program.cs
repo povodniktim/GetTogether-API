@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using API.Models;
 
 namespace API
@@ -28,6 +29,11 @@ namespace API
                 new ConfigurationBuilder()
                     .AddEnvironmentVariables()
                     .Build();
+
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

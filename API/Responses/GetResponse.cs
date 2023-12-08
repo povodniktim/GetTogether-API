@@ -12,7 +12,7 @@ namespace API.Responses
         public List<T> Collection { get; set; }
     }
 
-    class GetOneResponse<T>
+    class GetSingleResponse<T>
     {
         public T Item { get; set; }
     }
