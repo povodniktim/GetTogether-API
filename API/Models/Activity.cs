@@ -1,4 +1,7 @@
-﻿namespace API.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace API.Models;
 
 public partial class Activity
 {
@@ -6,5 +9,9 @@ public partial class Activity
 
     public string Name { get; set; } = null!;
 
+    public string IconClassName { get; set; } = null!;
+
     public virtual ICollection<Event> Events { get; set; } = new List<Event>();
+
+    public virtual ICollection<UserActivity> UserActivities { get; set; } = new List<UserActivity>();
 }

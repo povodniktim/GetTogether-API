@@ -1,9 +1,10 @@
 using API.Models;
+using API.Models.Requests.User;
+using API.Models.Response.User;
 using API.Responses;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Jose.Compact;
 
 namespace API.Controllers
 {
@@ -21,14 +22,46 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<User>> Get()
+        public async Task<ActionResult<IEnumerable<GetUserRequest>>> Get(
+        [FromQuery] int page = 1,
+        [FromQuery] int perPage = 10,
+        [FromQuery] string? filter = null)
         {
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            IQueryable<GetUserResponse> query = _context.Users
+                .Where(u => string.IsNullOrWhiteSpace(filter) ||
+                            u.FirstName.ToLower().Contains(filter.ToLower()) ||
+                            u.LastName.ToLower().Contains(filter.ToLower()) ||
+                            u.Email.ToLower().Contains(filter.ToLower()))
+                .OrderBy(u => u.CreatedAt)
+                .Skip((page - 1) * perPage)
+                .Take(perPage)
+                .Select(u => new GetUserResponse
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    CreatedAt = u.CreatedAt,
+                    ProfileImageUrl = u.ProfileImageUrl
+                });
+
+            int count = await _context.Users.CountAsync();
+
+            var users = await query.ToListAsync();
+
             return Ok(
-                new SuccessResponse<GetMultipleResponse<User>>(
-                    new GetMultipleResponse<User>
+                new SuccessResponse<GetMultipleResponse<GetUserResponse>>(
+                    new GetMultipleResponse<GetUserResponse>
                     {
-                        Count = await _context.Users.CountAsync(),
-                        Collection = await _context.Users.ToListAsync()
+                        Count = count,
+                        Page = page,
+                        PerPage = perPage,
+                        Collection = users
                     },
                     "List of all users"
                 )
@@ -37,12 +70,22 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<User>> GetById([FromRoute] int id)
+        public async Task<ActionResult<GetUserResponse>> GetById([FromRoute] int id)
         {
+            var user = await _context.Users
+                .Where(u => u.Id == id)
+                .Select(u => new GetUserResponse
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    CreatedAt = u.CreatedAt,
+                    ProfileImageUrl = u.ProfileImageUrl
+                })
+                .FirstOrDefaultAsync();
 
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null) 
+            if (user == null)
             {
                 return NotFound(
                     new ErrorResponse<string>(
@@ -53,85 +96,11 @@ namespace API.Controllers
             }
 
             return Ok(
-                new SuccessResponse<User>(
+                new SuccessResponse<GetUserResponse>(
                     user,
                     "User with id=" + user.Id
                 )
             );
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<User>> Create([FromBody] User user)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(
-                    new ErrorResponse<object>(
-                        ModelState.Values.ToArray(),
-                        "Invalid user data"
-                    )
-                );
-            }
-
-            _userService.Create(user);
-
-            return CreatedAtAction(
-                nameof(Get),
-                new { id = user.Id },
-                new SuccessResponse<User>(
-                    user,
-                    "User created successfully"
-                )
-            );
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] User user)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(
-                    new ErrorResponse<object>(
-                        ModelState.Values.ToArray(),
-                        "Invalid user data"
-                    )
-                );
-            }
-
-            if (id != user.Id)
-            {
-                return BadRequest(
-                    new ErrorResponse<string>(
-                        new string[] { "Invalid ID" },
-                        "Invalid user data"
-                    )
-                );
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound(
-                        new ErrorResponse<string>(
-                            new string[] { "User does not exist" },
-                            "Invalid user data"
-                        )
-                    );
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
