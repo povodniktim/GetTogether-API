@@ -1,4 +1,4 @@
-﻿using API.Models;
+﻿using API.Models.Responses.Activity;
 using API.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,26 +17,31 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<Activity>> Get(
-            [FromQuery] int page = 1,
-            [FromQuery] int perPage = 10
-        )
+        public async Task<ActionResult<IEnumerable<GetActivityResponse>>> Get(
+        [FromQuery] int page = 1,
+        [FromQuery] int perPage = 10
+)
         {
-            IQueryable<Activity> query = _context.Activities;
+            IQueryable<GetActivityResponse> query = _context.Activities
+                .Select(a => new GetActivityResponse
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    IconClassName = a.IconClassName
+                });
 
             int skip = (page - 1) * perPage;
 
-            query = query
+            var activities = await query
                 .Skip(skip)
-                .Take(perPage);
-
-            var activities = query.ToList();
+                .Take(perPage)
+                .ToListAsync();
 
             return Ok(
-                new SuccessResponse<GetMultipleResponse<Activity>>(
-                    new GetMultipleResponse<Activity>
+                new SuccessResponse<GetMultipleResponse<GetActivityResponse>>(
+                    new GetMultipleResponse<GetActivityResponse>
                     {
-                        Count = await query.CountAsync(),
+                        Count = await _context.Activities.CountAsync(),
                         Collection = activities,
                         Page = page,
                         PerPage = perPage
@@ -44,85 +49,6 @@ namespace API.Controllers
                     "List of all activities"
                 )
             );
-
         }
-
-        [HttpGet]
-        [Route("{id}")]
-        public async Task<ActionResult<Activity>> GetById([FromRoute] int id)
-        {
-
-            var activity = await _context.Activities.FindAsync(id);
-
-            if (activity == null)
-                return NotFound();
-
-            return Ok(activity);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<Activity>> Create([FromBody] Activity activity)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            _context.Activities.Add(activity);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(Get), new { id = activity.Id }, activity);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Activity activity)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != activity.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(activity).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!Exists(id))
-                {
-                    return NotFound();
-                }
-            }
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var activity = await _context.Activities.FindAsync(id);
-            if (activity == null)
-            {
-                return NotFound();
-            }
-
-            _context.Activities.Remove(activity);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool Exists(int id)
-        {
-            return _context.Activities.Any(e => e.Id == id);
-        }
-
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace API.Models;
+namespace API.Models;
 
 public partial class User
 {
@@ -30,5 +30,5 @@ public partial class User
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
-    public virtual ICollection<UserInterest> UserInterests { get; set; } = new List<UserInterest>();
+    public virtual ICollection<UserActivity> UserActivities { get; set; } = new List<UserActivity>();
 }
