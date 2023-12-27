@@ -1,4 +1,5 @@
-﻿using API.Models;
+﻿using API.Helpers;
+using API.Models;
 using API.Models.Requests.Event;
 using API.Models.Response.User;
 using API.Models.Responses.Activity;
@@ -24,67 +25,126 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<GetEventRequest>>> Get(
         [FromQuery] int page = 1,
         [FromQuery] int perPage = 10,
-        [FromQuery] string? filter = null)
+        [FromQuery] string? title = null,
+        [FromQuery] string? location = null,
+        [FromQuery] string[]? dates = null,
+        [FromQuery] int? maxParticipants = null,
+        [FromQuery] string? visibility = null,
+        [FromQuery] string? organizer = null)
         {
-            if (page < 1)
+            try
             {
-                page = 1;
+                if (dates == null)
+                {
+                    dates = new string[] { };
+                }
+                else if (!dates.All(DateHelper.IsValidShortDateFormat))
+                {
+                    throw new Exception("INVALID_DATES");
+                }
+
+                if (page < 1)
+                {
+                    page = 1;
+                }
+
+                IQueryable<GetEventResponse> baseQuery = _context.Events
+                    .Include(e => e.Organizer)
+                    .Where(e => e.Date >= DateTime.Now)
+                    .OrderBy(e => e.Date)
+                    .Select(e => new GetEventResponse
+                    {
+                        Id = e.Id,
+                        Title = e.Title,
+                        CreatedAt = e.CreatedAt,
+                        Description = e.Description,
+                        Date = e.Date,
+                        Location = e.Location,
+                        MaxParticipants = e.MaxParticipants,
+                        Visibility = e.Visibility ?? "public",
+                        Organizer = new GetUserResponse
+                        {
+                            Id = e.Organizer.Id,
+                            FirstName = e.Organizer.FirstName,
+                            LastName = e.Organizer.LastName,
+                            Email = e.Organizer.Email,
+                            CreatedAt = e.Organizer.CreatedAt,
+                            ProfileImageUrl = e.Organizer.ProfileImageUrl
+                        },
+                        Activity = new GetActivityResponse
+                        {
+                            Id = e.Activity.Id,
+                            Name = e.Activity.Name,
+                            IconClassName = e.Activity.IconClassName
+                        }
+                    });
+
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    baseQuery = baseQuery.Where(e => e.Title.ToLower().Contains(title.ToLower()));
+                }
+
+                if (!string.IsNullOrWhiteSpace(location))
+                {
+                    baseQuery = baseQuery.Where(e => e.Location.ToLower().Contains(location.ToLower()));
+                }
+
+                if (dates.Any())
+                {
+                    baseQuery = baseQuery.Where(e => dates.Contains(e.Date.Date.ToString()));
+                }
+
+                if (maxParticipants.HasValue)
+                {
+                    baseQuery = baseQuery.Where(e => e.MaxParticipants <= maxParticipants);
+                }
+
+                if (!string.IsNullOrWhiteSpace(visibility))
+                {
+                    baseQuery = baseQuery.Where(e => e.Visibility.ToLower() == visibility.ToLower());
+                }
+
+                if (!string.IsNullOrWhiteSpace(organizer))
+                {
+                    baseQuery = baseQuery.Where(e =>
+                        (e.Organizer.FirstName.ToLower() + " " + e.Organizer.LastName.ToLower()).Contains(organizer.ToLower()) ||
+                        e.Organizer.Email.ToLower().Contains(organizer.ToLower()));
+                }
+
+                int count = await baseQuery.CountAsync();
+
+                var events = await baseQuery
+                    .Skip((page - 1) * perPage)
+                    .Take(perPage)
+                    .ToListAsync();
+
+
+                return Ok(
+                    new SuccessResponse<GetMultipleResponse<GetEventResponse>>(
+                        new GetMultipleResponse<GetEventResponse>
+                        {
+                            Count = count,
+                            Page = page,
+                            PerPage = perPage,
+                            Collection = events
+                        },
+                        "List of events"
+                    )
+                );
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(
+                    new ErrorResponse<string>(
+                        new string[] { e.Message },
+                        e.Message == "INVALID_DATES" ? "Invalid dates" : "Failed to get events"
+                    )
+                );
             }
 
-            IQueryable<GetEventResponse> query = _context.Events
-                .Where(e => string.IsNullOrWhiteSpace(filter) ||
-                            e.Title.ToLower().Contains(filter.ToLower()) ||
-                            e.Description.ToLower().Contains(filter.ToLower()) ||
-                            e.Date.ToString().Contains(filter.ToLower()) ||
-                            e.Location.ToLower().Contains(filter.ToLower()))
-                .Include(e => e.Organizer)
-                .OrderBy(e => e.Date)
-                .Skip((page - 1) * perPage)
-                .Take(perPage)
-                .Select(e => new GetEventResponse
-                {
-                    Id = e.Id,
-                    Title = e.Title,
-                    CreatedAt = e.CreatedAt,
-                    Description = e.Description,
-                    Date = e.Date,
-                    Location = e.Location,
-                    MaxParticipants = e.MaxParticipants,
-                    Visibility = e.Visibility,
-                    Organizer = new GetUserResponse
-                    {
-                        Id = e.Organizer.Id,
-                        FirstName = e.Organizer.FirstName,
-                        LastName = e.Organizer.LastName,
-                        Email = e.Organizer.Email,
-                        CreatedAt = e.Organizer.CreatedAt,
-                        ProfileImageUrl = e.Organizer.ProfileImageUrl
-                    },
-                    Activity = new GetActivityResponse
-                    {
-                        Id = e.Activity.Id,
-                        Name = e.Activity.Name,
-                        IconClassName = e.Activity.IconClassName
-                    }
-                });
-
-            int count = await _context.Events.CountAsync();
-
-            var events = await query.ToListAsync();
-
-            return Ok(
-                new SuccessResponse<GetMultipleResponse<GetEventResponse>>(
-                    new GetMultipleResponse<GetEventResponse>
-                    {
-                        Count = count,
-                        Page = page,
-                        PerPage = perPage,
-                        Collection = events
-                    },
-                    "List of all events"
-                )
-            );
         }
+
 
         [HttpPost]
         public async Task<ActionResult<Event>> Create([FromBody] CreateEventRequest request)
