@@ -1,6 +1,6 @@
-﻿namespace API.Models.Response.User
+﻿namespace API.Models.Responses.User
 {
-    public class GetUserResponse
+    public class GetOrganizerResponse
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -8,7 +8,5 @@
         public string Email { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? ProfileImageUrl { get; set; }
-        public int CreatedEventsCount { get; set; }
-        public int AttendedEventsCount { get; set; }
     }
 }
