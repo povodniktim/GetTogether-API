@@ -1,5 +1,5 @@
-﻿using API.Models.Response.User;
-using API.Models.Responses.Activity;
+﻿using API.Models.Responses.Activity;
+using API.Models.Responses.User;
 
 namespace API.Models.Responses.Event
 {
@@ -15,7 +15,8 @@ namespace API.Models.Responses.Event
         public string Location { get; set; }
         public int? MaxParticipants { get; set; }
         public string Visibility { get; set; }
-        public GetUserResponse Organizer { get; set; }
+        public List<GetAttendeeResponse> Attendees { get; set; }
+        public GetOrganizerResponse Organizer { get; set; }
         public GetActivityResponse Activity { get; set; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using API.Helpers;
 using API.Models;
 using API.Models.Requests.Event;
-using API.Models.Response.User;
 using API.Models.Responses.Activity;
 using API.Models.Responses.Event;
+using API.Models.Responses.User;
 using API.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +62,7 @@ namespace API.Controllers
                         Location = e.Location,
                         MaxParticipants = e.MaxParticipants,
                         Visibility = e.Visibility ?? "public",
-                        Organizer = new GetUserResponse
+                        Organizer = new GetOrganizerResponse
                         {
                             Id = e.Organizer.Id,
                             FirstName = e.Organizer.FirstName,
@@ -76,7 +76,17 @@ namespace API.Controllers
                             Id = e.Activity.Id,
                             Name = e.Activity.Name,
                             IconClassName = e.Activity.IconClassName
-                        }
+                        },
+                        Attendees = _context.EventParticipants
+                            .Where(ep => ep.EventId == e.Id)
+                            .Select(ep => new GetAttendeeResponse
+                            {
+                                Id = ep.ParticipantId,
+                                FirstName = ep.Participant.FirstName,
+                                LastName = ep.Participant.LastName,
+                                ProfileImageUrl = ep.Participant.ProfileImageUrl
+                            })
+                            .ToList()
                     });
 
                 if (!string.IsNullOrWhiteSpace(title))
