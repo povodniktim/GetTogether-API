@@ -28,15 +28,18 @@ namespace API.Controllers
         [FromQuery] string? title = null,
         [FromQuery] string? location = null,
         [FromQuery] string[]? dates = null,
+        [FromQuery] string[]? activities = null,
         [FromQuery] int? maxParticipants = null,
         [FromQuery] string? visibility = null,
-        [FromQuery] string? organizer = null)
+        [FromQuery] string? organizer = null,
+        [FromQuery] string sortBy = "date",
+        [FromQuery] string sortDirection = "asc")
         {
             try
             {
                 if (dates == null)
                 {
-                    dates = new string[] { };
+                    dates = Array.Empty<string>();
                 }
                 else if (!dates.All(DateHelper.IsValidShortDateFormat))
                 {
@@ -50,8 +53,7 @@ namespace API.Controllers
 
                 IQueryable<GetEventResponse> baseQuery = _context.Events
                     .Include(e => e.Organizer)
-                    .Where(e => e.Date >= DateTime.Now)
-                    .OrderBy(e => e.Date)
+                    .Where(e => e.Date >= DateTime.Now && (e.MaxParticipants - (e.EventParticipants.Count + 1)) > 0)
                     .Select(e => new GetEventResponse
                     {
                         Id = e.Id,
@@ -61,6 +63,7 @@ namespace API.Controllers
                         Date = e.Date,
                         Location = e.Location,
                         MaxParticipants = e.MaxParticipants,
+                        PlacesLeft = (e.MaxParticipants - _context.EventParticipants.Count(ep => ep.EventId == e.Id)) - 1,
                         Visibility = e.Visibility ?? "public",
                         Organizer = new GetOrganizerResponse
                         {
@@ -77,9 +80,9 @@ namespace API.Controllers
                             Name = e.Activity.Name,
                             IconClassName = e.Activity.IconClassName
                         },
-                        Attendees = _context.EventParticipants
+                        Participants = _context.EventParticipants
                             .Where(ep => ep.EventId == e.Id)
-                            .Select(ep => new GetAttendeeResponse
+                            .Select(ep => new GetParticipantResponse
                             {
                                 Id = ep.ParticipantId,
                                 FirstName = ep.Participant.FirstName,
@@ -121,13 +124,39 @@ namespace API.Controllers
                         e.Organizer.Email.ToLower().Contains(organizer.ToLower()));
                 }
 
+                if (activities != null && activities.Any())
+                {
+                    baseQuery = baseQuery.Where(e => activities.Contains(e.Activity.Name));
+                }
+
+                // Sorting
+                switch (sortBy.ToLower())
+                {
+                    case "date":
+                        baseQuery = (sortDirection.ToLower() == "asc")
+                            ? baseQuery.OrderBy(e => e.Date)
+                            : baseQuery.OrderByDescending(e => e.Date);
+                        break;
+                    case "placesleft":
+                        baseQuery = (sortDirection.ToLower() == "asc")
+                            ? baseQuery.OrderBy(e => e.PlacesLeft)
+                            : baseQuery.OrderByDescending(e => e.PlacesLeft);
+                        break;
+                    case "datecreated":
+                        baseQuery = (sortDirection.ToLower() == "asc")
+                            ? baseQuery.OrderBy(e => e.CreatedAt)
+                            : baseQuery.OrderByDescending(e => e.CreatedAt);
+                        break;
+                    default:
+                        break;
+                }
+
                 int count = await baseQuery.CountAsync();
 
                 var events = await baseQuery
                     .Skip((page - 1) * perPage)
                     .Take(perPage)
                     .ToListAsync();
-
 
                 return Ok(
                     new SuccessResponse<GetMultipleResponse<GetEventResponse>>(
@@ -152,9 +181,7 @@ namespace API.Controllers
                     )
                 );
             }
-
         }
-
 
         [HttpPost]
         public async Task<ActionResult<Event>> Create([FromBody] CreateEventRequest request)

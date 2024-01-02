@@ -155,9 +155,9 @@ namespace API.Controllers
                             Name = e.Activity.Name,
                             IconClassName = e.Activity.IconClassName
                         },
-                        Attendees = _context.EventParticipants
+                        Participants = _context.EventParticipants
                             .Where(ep => ep.EventId == e.Id)
-                            .Select(ep => new GetAttendeeResponse
+                            .Select(ep => new GetParticipantResponse
                             {
                                 Id = ep.ParticipantId,
                                 FirstName = ep.Participant.FirstName,
@@ -201,12 +201,12 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [Route("{id}/interests")]
-        public async Task<ActionResult<IEnumerable<GetActivityRequest>>> GetUserInterests(int id)
+        [Route("{id}/activities")]
+        public async Task<ActionResult<IEnumerable<GetActivityRequest>>> GetUserActivities(int id)
         {
             try
             {
-                var userInterests = await _context.UserActivities
+                var userActivities = await _context.UserActivities
                    .Where(ua => ua.UserId == id)
                    .Select(ua => new GetActivityResponse
                    {
@@ -218,8 +218,8 @@ namespace API.Controllers
 
                 return Ok(
                     new SuccessResponse<IEnumerable<GetActivityResponse>>(
-                        userInterests,
-                        "User interests"
+                        userActivities,
+                        "User activities"
                     )
                 );
             }
@@ -228,7 +228,7 @@ namespace API.Controllers
                 return BadRequest(
                    new ErrorResponse<string>(
                        new string[] { e.Message },
-                        "Failed to get interests for user with id=" + id
+                        "Failed to get activities for user with id=" + id
                    )
                );
             }

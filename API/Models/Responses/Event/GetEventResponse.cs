@@ -13,9 +13,10 @@ namespace API.Models.Responses.Event
         public string Description { get; set; }
         public DateTime Date { get; set; }
         public string Location { get; set; }
-        public int? MaxParticipants { get; set; }
+        public int MaxParticipants { get; set; }
+        public int PlacesLeft { get; set; }
         public string Visibility { get; set; }
-        public List<GetAttendeeResponse> Attendees { get; set; }
+        public List<GetParticipantResponse> Participants { get; set; }
         public GetOrganizerResponse Organizer { get; set; }
         public GetActivityResponse Activity { get; set; }
     }
