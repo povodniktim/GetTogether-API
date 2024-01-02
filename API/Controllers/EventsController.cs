@@ -57,6 +57,8 @@ namespace API.Controllers
                     .Select(e => new GetEventResponse
                     {
                         Id = e.Id,
+                        OrganizerId = e.OrganizerId,
+                        ActivityId = e.ActivityId,
                         Title = e.Title,
                         CreatedAt = e.CreatedAt,
                         Description = e.Description,
@@ -129,7 +131,6 @@ namespace API.Controllers
                     baseQuery = baseQuery.Where(e => activities.Contains(e.Activity.Name));
                 }
 
-                // Sorting
                 switch (sortBy.ToLower())
                 {
                     case "date":
@@ -137,12 +138,12 @@ namespace API.Controllers
                             ? baseQuery.OrderBy(e => e.Date)
                             : baseQuery.OrderByDescending(e => e.Date);
                         break;
-                    case "placesleft":
+                    case "places-left":
                         baseQuery = (sortDirection.ToLower() == "asc")
                             ? baseQuery.OrderBy(e => e.PlacesLeft)
                             : baseQuery.OrderByDescending(e => e.PlacesLeft);
                         break;
-                    case "datecreated":
+                    case "date-created":
                         baseQuery = (sortDirection.ToLower() == "asc")
                             ? baseQuery.OrderBy(e => e.CreatedAt)
                             : baseQuery.OrderByDescending(e => e.CreatedAt);
@@ -180,6 +181,70 @@ namespace API.Controllers
                         e.Message == "INVALID_DATES" ? "Invalid dates" : "Failed to get events"
                     )
                 );
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GetEventRequest>> GetById(int id)
+        {
+            try
+            {
+                var eventEntity = await _context.Events
+                    .Include(e => e.Organizer)
+                    .Include(e => e.Activity)
+                    .Include(e => e.EventParticipants)
+                    .ThenInclude(ep => ep.Participant)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (eventEntity == null)
+                {
+                    return NotFound();
+                }
+
+                var getEventResponse = new GetEventResponse
+                {
+                    Id = eventEntity.Id,
+                    OrganizerId = eventEntity.OrganizerId,
+                    ActivityId = eventEntity.ActivityId,
+                    Title = eventEntity.Title,
+                    CreatedAt = eventEntity.CreatedAt,
+                    Description = eventEntity.Description,
+                    Date = eventEntity.Date,
+                    Location = eventEntity.Location,
+                    MaxParticipants = eventEntity.MaxParticipants,
+                    PlacesLeft = (eventEntity.MaxParticipants - _context.EventParticipants.Count(ep => ep.EventId == eventEntity.Id)) - 1,
+                    Visibility = eventEntity.Visibility ?? "public",
+                    Organizer = new GetOrganizerResponse
+                    {
+                        Id = eventEntity.Organizer.Id,
+                        FirstName = eventEntity.Organizer.FirstName,
+                        LastName = eventEntity.Organizer.LastName,
+                        Email = eventEntity.Organizer.Email,
+                        CreatedAt = eventEntity.Organizer.CreatedAt,
+                        ProfileImageUrl = eventEntity.Organizer.ProfileImageUrl
+                    },
+                    Activity = new GetActivityResponse
+                    {
+                        Id = eventEntity.Activity.Id,
+                        Name = eventEntity.Activity.Name,
+                        IconClassName = eventEntity.Activity.IconClassName
+                    },
+                    Participants = eventEntity.EventParticipants
+                        .Select(ep => new GetParticipantResponse
+                        {
+                            Id = ep.ParticipantId,
+                            FirstName = ep.Participant.FirstName,
+                            LastName = ep.Participant.LastName,
+                            ProfileImageUrl = ep.Participant.ProfileImageUrl
+                        })
+                        .ToList()
+                };
+
+                return Ok(new SuccessResponse<GetEventResponse>(getEventResponse, "Event details"));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ErrorResponse<string>(new string[] { e.Message }, "Failed to get event details"));
             }
         }
 
