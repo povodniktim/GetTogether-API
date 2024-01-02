@@ -19,7 +19,7 @@ namespace API
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   policy =>
                                   {
-                                      policy.WithOrigins("https://api-gettogether.azurewebsites.net");
+                                      policy.AllowAnyOrigin();
                                       policy.AllowAnyHeader();
                                   });
             });
