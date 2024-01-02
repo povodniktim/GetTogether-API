@@ -1,4 +1,5 @@
 using API.Models;
+using API.Models.Requests.Activity;
 using API.Models.Requests.User;
 using API.Models.Response.User;
 using API.Models.Responses.Activity;
@@ -75,7 +76,7 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<GetOrganizerResponse>> GetById([FromRoute] int id)
+        public async Task<ActionResult<GetOrganizerRequest>> GetById([FromRoute] int id)
         {
             var user = await _context.Users
                 .Where(u => u.Id == id)
@@ -199,10 +200,9 @@ namespace API.Controllers
 
         }
 
-
         [HttpGet]
         [Route("{id}/interests")]
-        public async Task<ActionResult<IEnumerable<GetActivityResponse>>> GetUserInterests(int id)
+        public async Task<ActionResult<IEnumerable<GetActivityRequest>>> GetUserInterests(int id)
         {
             try
             {
