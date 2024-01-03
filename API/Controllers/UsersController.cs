@@ -234,7 +234,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPut("preferences/{id}")]
+        [HttpPut("{id}/preferences")]
         public async Task<ActionResult> UpdateUserPreferences(int id, [FromBody] PutUserRequest request)
         {
             try
