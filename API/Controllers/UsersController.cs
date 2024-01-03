@@ -234,6 +234,71 @@ namespace API.Controllers
             }
         }
 
+        [HttpPut("preferences/{id}")]
+        public async Task<ActionResult> UpdateUserPreferences(int id, [FromBody] PutUserRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var user = await _context.Users
+                    .Include(u => u.UserActivities)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                if (user == null)
+                {
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { "User not found" },
+                            "Invalid user data"
+                        ));
+                }
+
+                user.UserActivities.Clear();
+
+                foreach (var activityId in request.ActivityIds)
+                {
+                    var activityExists = await _context.Activities.AnyAsync(a => a.Id == activityId);
+
+                    if (!activityExists)
+                    {
+                        return NotFound(
+                            new ErrorResponse<string>(
+                                new string[] { $"Activity with ID {activityId} not found" },
+                                "Invalid activity ID"
+                            ));
+                    }
+
+                    if (!user.UserActivities.Any(ua => ua.ActivityId == activityId))
+                    {
+                        var userActivity = new UserActivity
+                        {
+                            UserId = id,
+                            ActivityId = activityId
+                        };
+
+                        user.UserActivities.Add(userActivity);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(
+                    new SuccessResponse<User>(
+                        user,
+                        "User preferences updated successfully"
+                    )
+                );
+            }
+            catch (Exception e)
+            {
+                return BadRequest($"Failed to update user preferences: {e.Message}");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<User>> Delete(int id)
         {

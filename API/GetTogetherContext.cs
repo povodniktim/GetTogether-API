@@ -233,12 +233,12 @@ public partial class GetTogetherContext : DbContext
 
             entity.HasOne(d => d.Activity).WithMany(p => p.UserActivities)
                 .HasForeignKey(d => d.ActivityId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 .HasConstraintName("userActivities_activity_fk");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserActivities)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 .HasConstraintName("userActivities_user_fk");
         });
 

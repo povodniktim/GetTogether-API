@@ -306,7 +306,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PutEventResponse updatedEvent)
+        public async Task<IActionResult> Update(int id, [FromBody] PutEventRequest updatedEvent)
         {
             if (!ModelState.IsValid)
             {
