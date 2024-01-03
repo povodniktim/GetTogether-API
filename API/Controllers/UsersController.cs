@@ -235,7 +235,7 @@ namespace API.Controllers
         }
 
         [HttpPost("{id}/activities")]
-        public async Task<ActionResult> AddUserPreferences(int id, [FromBody] PutUserRequest request)
+        public async Task<ActionResult> CreateUserActivities(int id, [FromBody] PutUserRequest request)
         {
             try
             {
@@ -270,16 +270,24 @@ namespace API.Controllers
                             ));
                     }
 
-                    if (!user.UserActivities.Any(ua => ua.ActivityId == activityId))
-                    {
-                        var userActivity = new UserActivity
-                        {
-                            UserId = id,
-                            ActivityId = activityId
-                        };
+                    var existingUserActivity = user.UserActivities.FirstOrDefault(ua => ua.ActivityId == activityId);
 
-                        user.UserActivities.Add(userActivity);
+                    if (existingUserActivity != null)
+                    {
+                        return Conflict(
+                            new ErrorResponse<string>(
+                                new string[] { $"User already has a preference for activity with ID {activityId}" },
+                                "Duplicate activity preference"
+                            ));
                     }
+
+                    var userActivity = new UserActivity
+                    {
+                        UserId = id,
+                        ActivityId = activityId
+                    };
+
+                    user.UserActivities.Add(userActivity);
                 }
 
                 await _context.SaveChangesAsync();
@@ -298,7 +306,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}/activities")]
-        public async Task<ActionResult> UpdateUserPreferences(int id, [FromBody] PutUserRequest request)
+        public async Task<ActionResult> UpdateUserActivities(int id, [FromBody] PutUserRequest request)
         {
             try
             {
