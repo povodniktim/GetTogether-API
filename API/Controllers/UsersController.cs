@@ -125,7 +125,6 @@ namespace API.Controllers
 
             try
             {
-
                 IQueryable<GetEventResponse> baseQuery = _context.Events
                     .Include(e => e.Organizer)
                     .Where(e => e.Date >= DateTime.Now && e.Organizer.Id == id)
@@ -259,6 +258,17 @@ namespace API.Controllers
 
                 foreach (var activityId in request.ActivityIds)
                 {
+                    var existingUserActivity = await _context.UserActivities.AnyAsync(a => a.UserId == id);
+
+                    if (existingUserActivity)
+                    {
+                        return Conflict(
+                            new ErrorResponse<string>(
+                                new string[] { $"You have already selected your preferred interests during the initial registration. If you need to make changes, please contact support." },
+                                "Duplicate interest selection"
+                            ));
+                    }
+
                     var activityExists = await _context.Activities.AnyAsync(a => a.Id == activityId);
 
                     if (!activityExists)
@@ -267,17 +277,6 @@ namespace API.Controllers
                             new ErrorResponse<string>(
                                 new string[] { $"Activity with ID {activityId} not found" },
                                 "Invalid activity ID"
-                            ));
-                    }
-
-                    var existingUserActivity = user.UserActivities.FirstOrDefault(ua => ua.ActivityId == activityId);
-
-                    if (existingUserActivity != null)
-                    {
-                        return Conflict(
-                            new ErrorResponse<string>(
-                                new string[] { $"User already has a preference for activity with ID {activityId}" },
-                                "Duplicate activity preference"
                             ));
                     }
 
