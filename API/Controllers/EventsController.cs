@@ -283,7 +283,15 @@ namespace API.Controllers
             };
 
             _context.Events.Add(newEvent);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to create the event. Please check your request and try again."));
+            }
 
 
             return Ok(
@@ -333,19 +341,12 @@ namespace API.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!Exists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to update the event. Please check your request and try again."));
             }
 
-            return NoContent();
+            return Ok(new SuccessResponse<string>("Event updated successfully"));
         }
 
 
@@ -359,7 +360,14 @@ namespace API.Controllers
             }
 
             _context.Events.Remove(_event);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to delete the event. Please check your request and try again."));
+            }
 
             return NoContent();
         }

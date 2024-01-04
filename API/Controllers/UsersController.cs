@@ -290,7 +290,14 @@ namespace API.Controllers
                     user.UserActivities.Add(userActivity);
                 }
 
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to create the event. Please check your request and try again."));
+                }
 
                 return Ok(
                     new SuccessResponse<User>(
@@ -355,7 +362,14 @@ namespace API.Controllers
                     }
                 }
 
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception e)
+                {
+                    return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to update user activities. Please check your request and try again."));
+                }
 
                 return Ok(
                     new SuccessResponse<User>(
@@ -386,7 +400,15 @@ namespace API.Controllers
             }
 
             _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to delete the event. Please check your request and try again."));
+            }
 
             return Ok(
                 new SuccessResponse<User>(
