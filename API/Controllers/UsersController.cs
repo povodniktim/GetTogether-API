@@ -87,7 +87,9 @@ namespace API.Controllers
                     LastName = u.LastName,
                     Email = u.Email,
                     CreatedAt = u.CreatedAt,
-                    ProfileImageUrl = u.ProfileImageUrl
+                    ProfileImageUrl = u.ProfileImageUrl,
+                    CreatedEventsCount = _context.Events.Count(e => e.OrganizerId == u.Id),
+                    AttendedEventsCount = _context.EventParticipants.Count(ep => ep.ParticipantId == u.Id)
                 })
                 .FirstOrDefaultAsync();
 

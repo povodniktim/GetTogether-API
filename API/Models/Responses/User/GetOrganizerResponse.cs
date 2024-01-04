@@ -8,5 +8,7 @@
         public string Email { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public int CreatedEventsCount { get; set; }
+        public int AttendedEventsCount { get; set; }
     }
 }
