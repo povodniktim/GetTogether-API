@@ -323,7 +323,6 @@ namespace API.Controllers
             existingEvent.Title = updatedEvent.Title;
             existingEvent.OrganizerId = updatedEvent.OrganizerId;
             existingEvent.ActivityId = updatedEvent.ActivityId;
-            existingEvent.CreatedAt = updatedEvent.CreatedAt;
             existingEvent.Description = updatedEvent.Description;
             existingEvent.Date = updatedEvent.Date;
             existingEvent.Location = updatedEvent.Location;
