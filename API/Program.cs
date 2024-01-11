@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using API.Middlewares;
 
 namespace API
 {
@@ -21,6 +22,7 @@ namespace API
                                   {
                                       policy.AllowAnyOrigin();
                                       policy.AllowAnyHeader();
+                                      policy.AllowAnyMethod();
                                   });
             });
 
@@ -45,8 +47,8 @@ namespace API
                 app.UseSwaggerUI();
             }
 
-            //app.UseMiddleware<BasicAuthMiddleware>();
-            //app.UseMiddleware<TokenValidationMiddleware>();
+            // app.UseMiddleware<BasicAuthMiddleware>();
+            // app.UseMiddleware<TokenValidationMiddleware>();
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseHttpsRedirection();
