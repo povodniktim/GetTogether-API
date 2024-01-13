@@ -313,6 +313,91 @@ namespace API.Controllers
             );
         }
 
+        [HttpPost("{id}/join")]
+        public async Task<ActionResult> JoinEvent(int id, [FromBody] JoinEventRequest request)
+        {
+            try
+            {
+                var eventToJoin = await _context.Events
+                    .Include(e => e.EventParticipants)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (eventToJoin == null)
+                {
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { $"Event with ID {id} not found" },
+                            "Invalid event ID"
+                        )
+                    );
+                }
+
+                var doesUserExist = await _context.Users.AnyAsync(u => u.Id == request.UserId);
+
+                if (!doesUserExist)
+                {
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { $"User with ID {request.UserId} not found" },
+                            "Invalid user ID"
+                        )
+                    );
+                }
+
+                var isAlreadyParticipant = eventToJoin.EventParticipants
+                    .Any(ep => ep.ParticipantId == request.UserId);
+
+                if (isAlreadyParticipant)
+                {
+                    return Conflict(
+                        new ErrorResponse<string>(
+                            new string[] { "You are already a participant in this event" },
+                            "Duplicate participant registration"
+                        )
+                    );
+                }
+
+                var eventParticipant = new EventParticipant
+                {
+                    ParticipantId = request.UserId,
+                    EventId = id,
+                    StatusChangedAt = DateTime.UtcNow
+                };
+
+                eventToJoin.EventParticipants.Add(eventParticipant);
+
+                await _context.SaveChangesAsync();
+
+                return Ok(
+                    new SuccessResponse<JoinEventResponse>(
+                         new JoinEventResponse
+                         {
+                             Id = eventToJoin.Id,
+                             Title = eventToJoin.Title,
+                             OrganizerId = eventToJoin.OrganizerId,
+                             ActivityId = eventToJoin.ActivityId,
+                             CreatedAt = eventToJoin.CreatedAt,
+                             Description = eventToJoin.Description,
+                             Date = eventToJoin.Date,
+                             Location = eventToJoin.Location,
+                             MaxParticipants = eventToJoin.MaxParticipants,
+                             Visibility = eventToJoin.Visibility
+                         },
+                        "Successfully joined the event"
+                    )
+                );
+            }
+            catch (Exception e)
+            {
+                return BadRequest(
+                    new ErrorResponse<string>(
+                            new string[] { $"Failed to join the event: {e.Message}" },
+                            "Failed to join the event"
+                    )
+                );
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PutEventRequest updatedEvent)
         {
@@ -335,7 +420,7 @@ namespace API.Controllers
             existingEvent.Date = updatedEvent.Date;
             existingEvent.Location = updatedEvent.Location;
             existingEvent.MaxParticipants = (int)updatedEvent.MaxParticipants;
-            existingEvent.Visibility = updatedEvent.Visibility;
+            existingEvent.Visibility = updatedEvent.Visibility ?? "public";
 
             try
             {
@@ -372,9 +457,91 @@ namespace API.Controllers
             return NoContent();
         }
 
-        private bool Exists(int id)
+        [HttpDelete("{id}/leave")]
+        public async Task<ActionResult> LeaveEvent(int id, [FromBody] LeaveEventRequest request)
         {
-            return _context.Events.Any(e => e.Id == id);
+            try
+            {
+                var eventToLeave = await _context.Events
+                    .Include(e => e.EventParticipants)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (eventToLeave == null)
+                {
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { $"Event with ID {id} not found" },
+                            "Invalid event ID"
+                        )
+                    );
+                }
+
+                var doesUserExist = await _context.Users.AnyAsync(u => u.Id == request.UserId);
+
+                if (!doesUserExist)
+                {
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { $"User with ID {request.UserId} not found" },
+                            "Invalid user ID"
+                        )
+                    );
+                }
+
+                var eventParticipant = eventToLeave.EventParticipants
+                    .FirstOrDefault(ep => ep.ParticipantId == request.UserId);
+
+                if (eventParticipant == null)
+                {
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { "You are not a participant in this event" },
+                            "The specified participant was not found in the event"
+                        )
+                    );
+                }
+
+                eventToLeave.EventParticipants.Remove(eventParticipant);
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+
+                return Ok(new SuccessResponse<LeaveEventResponse>(
+                    new LeaveEventResponse
+                    {
+                        Id = eventToLeave.Id,
+                        Title = eventToLeave.Title,
+                        OrganizerId = eventToLeave.OrganizerId,
+                        ActivityId = eventToLeave.ActivityId,
+                        CreatedAt = eventToLeave.CreatedAt,
+                        Description = eventToLeave.Description,
+                        Date = eventToLeave.Date,
+                        Location = eventToLeave.Location,
+                        MaxParticipants = eventToLeave.MaxParticipants,
+                        Visibility = eventToLeave.Visibility ?? "public"
+                    },
+                    "Successfully left the event"
+                ));
+            }
+            catch (Exception e)
+            {
+                return BadRequest(
+                    new ErrorResponse<string>(
+                            new string[] { $"Failed to leave the event: {e.Message}" },
+                            "Failed to leave the event"
+                    )
+                );
+            }
         }
     }
 }
