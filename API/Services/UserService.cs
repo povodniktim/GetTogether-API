@@ -1,4 +1,5 @@
 using API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
@@ -11,9 +12,9 @@ namespace API.Services
             _context = context;
         }
 
-        public User? GetByEmail(string email)
+        public async Task<User?> GetByEmail(string email)
         {
-            return _context.Users.FirstOrDefault(user => user.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
         }
 
         public User? GetByRefreshToken(string token)
@@ -27,16 +28,43 @@ namespace API.Services
             return user;
         }
 
-        public void UpdateRefreshToken(string email, string? encryptedRefreshToken)
+        public async void UpdateSocialId(string email, string? socialId, string provider)
         {
-            var user = GetByEmail(email);
+            var user = await GetByEmail(email);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            switch (provider)
+            {
+                case "google":
+                    user.GoogleId = socialId;
+                    break;
+                case "facebook":
+                    user.FacebookId = socialId;
+                    break;
+                case "apple":
+                    user.AppleId = socialId;
+                    break;
+                default:
+                    throw new Exception("Invalid provider");
+            }
+
+           await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateRefreshToken(string email, string? encryptedRefreshToken)
+        {
+            User? user = await GetByEmail(email);
             if (user == null)
             {
                 throw new Exception("User not found");
             }
 
             user.RefreshToken = encryptedRefreshToken;
-            _context.SaveChanges();
+
+            await _context.SaveChangesAsync();
         }
 
         public static UserTokenInfo GetTokenPayloadFromUser(User user)

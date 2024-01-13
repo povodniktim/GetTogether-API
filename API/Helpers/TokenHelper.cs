@@ -30,5 +30,17 @@ namespace API.Helpers
                 AccessToken = AccessToken
             };
         }
+        public static string GetBearerTokenFromHeader(string? header)
+        {
+
+            if (header == null || !header.StartsWith("Bearer "))
+            {
+                throw new Exception("Invalid bearer token");
+            }
+
+            return header.Substring("Bearer ".Length).Trim();
+        }
+
     }
+
 }
