@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace API.Models;
+﻿namespace API.Models;
 
 public partial class EventParticipant
 {
@@ -11,7 +8,8 @@ public partial class EventParticipant
 
     public int EventId { get; set; }
 
-    public string? Status { get; set; }
+    // TODO: we currently don't use this
+    public string? Status { get; set; } = "going";
 
     public DateTime? StatusChangedAt { get; set; }
 

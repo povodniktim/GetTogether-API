@@ -129,7 +129,7 @@ namespace API.Controllers
             {
                 IQueryable<GetEventResponse> baseQuery = _context.Events
                     .Include(e => e.Organizer)
-                    .Where(e => e.Date >= DateTime.Now && e.Organizer.Id == id)
+                    .Where(e => e.Organizer.Id == id)
                     .OrderBy(e => e.Date)
                     .Select(e => new GetEventResponse
                     {

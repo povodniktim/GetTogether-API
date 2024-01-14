@@ -3,6 +3,7 @@ using System;
 using API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(GetTogetherContext))]
-    partial class GetTogetherContextModelSnapshot : ModelSnapshot
+    [Migration("20240113143612_Event_Participats_status_to_going")]
+    partial class Event_Participats_status_to_going
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,14 +297,12 @@ namespace API.Migrations
                     b.HasOne("API.Models.Event", "Event")
                         .WithMany("EventParticipants")
                         .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired()
                         .HasConstraintName("EventParticipants_Event");
 
                     b.HasOne("API.Models.User", "Participant")
                         .WithMany("EventParticipants")
                         .HasForeignKey("ParticipantId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired()
                         .HasConstraintName("EventParticipants_Participant");
 
