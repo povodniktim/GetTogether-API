@@ -198,7 +198,12 @@ namespace API.Controllers
 
                 if (eventEntity == null)
                 {
-                    return NotFound();
+                    return NotFound(
+                        new ErrorResponse<string>(
+                            new string[] { $"Event with ID {id} not found" },
+                            "Invalid event ID"
+                        )
+                    );
                 }
 
                 var getEventResponse = new GetEventResponse
@@ -260,13 +265,28 @@ namespace API.Controllers
                 .Include(u => u.Events)
                 .FirstOrDefaultAsync(u => u.Id == request.OrganizerId);
 
+            if (existingOrganizer == null)
+            {
+                return NotFound(
+                    new ErrorResponse<string>(
+                        new string[] { $"User with ID {request.OrganizerId} not found" },
+                        "Invalid user ID"
+                    )
+                );
+            }
+
             var existingActivity = await _context.Activities
                 .Include(a => a.Events)
                 .FirstOrDefaultAsync(a => a.Id == request.ActivityId);
 
-            if (existingOrganizer == null || existingActivity == null)
+            if (existingActivity == null)
             {
-                return NotFound();
+                return NotFound(
+                    new ErrorResponse<string>(
+                        new string[] { $"Activity with ID {request.ActivityId} not found" },
+                        "Invalid activity ID"
+                    )
+                );
             }
 
             var newEvent = new Event
@@ -410,7 +430,12 @@ namespace API.Controllers
 
             if (existingEvent == null)
             {
-                return NotFound();
+                return NotFound(
+                    new ErrorResponse<string>(
+                        new string[] { $"Event with ID {id} not found" },
+                        "Invalid event ID"
+                    )
+                );
             }
 
             existingEvent.Title = updatedEvent.Title;
@@ -434,17 +459,33 @@ namespace API.Controllers
             return Ok(new SuccessResponse<string>("Event updated successfully"));
         }
 
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var _event = await _context.Events.FindAsync(id);
+            var _event = await _context.Events
+                .Include(e => e.EventParticipants)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
             if (_event == null)
             {
-                return NotFound();
+                return NotFound(
+                    new ErrorResponse<string>(
+                        new string[] { $"Event with ID {id} not found" },
+                        "Invalid event ID"
+                    )
+                );
+            }
+
+            if (_event.EventParticipants.Any())
+            {
+                foreach (var participant in _event.EventParticipants)
+                {
+                    _context.EventParticipants.Remove(participant);
+                }
             }
 
             _context.Events.Remove(_event);
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -516,22 +557,7 @@ namespace API.Controllers
                     throw;
                 }
 
-                return Ok(new SuccessResponse<LeaveEventResponse>(
-                    new LeaveEventResponse
-                    {
-                        Id = eventToLeave.Id,
-                        Title = eventToLeave.Title,
-                        OrganizerId = eventToLeave.OrganizerId,
-                        ActivityId = eventToLeave.ActivityId,
-                        CreatedAt = eventToLeave.CreatedAt,
-                        Description = eventToLeave.Description,
-                        Date = eventToLeave.Date,
-                        Location = eventToLeave.Location,
-                        MaxParticipants = eventToLeave.MaxParticipants,
-                        Visibility = eventToLeave.Visibility ?? "public"
-                    },
-                    "Successfully left the event"
-                ));
+                return NoContent();
             }
             catch (Exception e)
             {
