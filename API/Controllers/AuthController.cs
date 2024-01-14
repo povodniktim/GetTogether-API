@@ -1,4 +1,3 @@
-using System.Web;
 using API.Helpers;
 using API.Models;
 using API.Models.Response.User;
@@ -6,6 +5,7 @@ using API.Models.Responses.Auth;
 using API.Responses;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace API.Controllers.Auth
 {
@@ -26,7 +26,8 @@ namespace API.Controllers.Auth
         }
 
         [HttpPost("social")]
-        public async Task<ActionResult<User>> SocialSignIn(
+        public async Task<ActionResult<User>> SocialSignIn
+        (
             [FromQuery] string? provider,
             [FromBody] UserSocialSignIn user
         )
@@ -52,8 +53,10 @@ namespace API.Controllers.Auth
             }
             catch (Exception e)
             {
-                return BadRequest(
-                    new ErrorResponse<object>(
+                return BadRequest
+                (
+                    new ErrorResponse<object>
+                    (
                         new string[] { e.Message },
                         "Sign up has failed"
                     )
@@ -100,8 +103,10 @@ namespace API.Controllers.Auth
 
                 await _userService.UpdateRefreshToken(user.Email, null);
 
-                return Ok(
-                    new SuccessResponse<string>(
+                return Ok
+                (
+                    new SuccessResponse<string>
+                    (
                         "Sign out successfully"
                     )
                 );
@@ -109,8 +114,10 @@ namespace API.Controllers.Auth
             }
             catch (Exception e)
             {
-                return BadRequest(
-                    new ErrorResponse<string>(
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { e.Message },
                         "Sign out has failed"
                     )
@@ -170,27 +177,34 @@ namespace API.Controllers.Auth
                     AttendedEventsCount = _context.EventParticipants.Count(ep => ep.ParticipantId == user.Id)
                 };
 
-                return Ok(
-                    new SuccessResponse<GetUserResponse>(
+                return Ok
+                (
+                    new SuccessResponse<GetUserResponse>
+                    (
                         userResponse,
                         "User found"
-                    ));
+                    )
+                );
 
             }
             catch (Exception e)
             {
                 if (e.Message == "INVALID_ACCESS_TOKEN" || e.Message == "USER_NOT_FOUND")
                 {
-                    return Unauthorized(
-                        new ErrorResponse<string>(
+                    return Unauthorized
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { e.Message },
                             "Invalid access token"
                         )
                     );
                 }
 
-                return BadRequest(
-                    new ErrorResponse<string>(
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { e.Message },
                         "User not found"
                     )
@@ -202,7 +216,6 @@ namespace API.Controllers.Auth
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshToken()
         {
-
             try
             {
                 string refreshToken = TokenHelper.GetBearerTokenFromHeader(Request.Headers["Authorization"]);
@@ -253,8 +266,10 @@ namespace API.Controllers.Auth
 
                 await _userService.UpdateRefreshToken(user.Email, encryptedRefreshToken);
 
-                return Ok(
-                    new SuccessResponse<TokenResponse>(
+                return Ok
+                (
+                    new SuccessResponse<TokenResponse>
+                    (
                         new TokenResponse()
                         {
                             AccessToken = HttpUtility.UrlEncode(encryptedAccessToken),
@@ -267,8 +282,10 @@ namespace API.Controllers.Auth
             }
             catch (Exception e)
             {
-                return BadRequest(
-                    new ErrorResponse<string>(
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { e.Message },
                         "Invalid refresh token"
                     )

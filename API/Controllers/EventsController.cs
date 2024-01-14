@@ -22,18 +22,20 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GetEventRequest>>> Get(
-        [FromQuery] int page = 1,
-        [FromQuery] int perPage = 10,
-        [FromQuery] string? title = null,
-        [FromQuery] string? location = null,
-        [FromQuery] string[]? dates = null,
-        [FromQuery] string[]? activities = null,
-        [FromQuery] int? maxParticipants = null,
-        [FromQuery] string? visibility = null,
-        [FromQuery] string? organizer = null,
-        [FromQuery] string sortBy = "date",
-        [FromQuery] string sortDirection = "asc")
+        public async Task<ActionResult<IEnumerable<GetEventRequest>>> Get
+        (
+            [FromQuery] int page = 1,
+            [FromQuery] int perPage = 10,
+            [FromQuery] string? title = null,
+            [FromQuery] string? location = null,
+            [FromQuery] string[]? dates = null,
+            [FromQuery] string[]? activities = null,
+            [FromQuery] int? maxParticipants = null,
+            [FromQuery] string? visibility = null,
+            [FromQuery] string? organizer = null,
+            [FromQuery] string sortBy = "date",
+            [FromQuery] string sortDirection = "asc"
+        )
         {
             try
             {
@@ -159,8 +161,10 @@ namespace API.Controllers
                     .Take(perPage)
                     .ToListAsync();
 
-                return Ok(
-                    new SuccessResponse<GetMultipleResponse<GetEventResponse>>(
+                return Ok
+                (
+                    new SuccessResponse<GetMultipleResponse<GetEventResponse>>
+                    (
                         new GetMultipleResponse<GetEventResponse>
                         {
                             Count = count,
@@ -175,8 +179,10 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(
-                    new ErrorResponse<string>(
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { e.Message },
                         e.Message == "INVALID_DATES" ? "Invalid dates" : "Failed to get events"
                     )
@@ -198,8 +204,10 @@ namespace API.Controllers
 
                 if (eventEntity == null)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { $"Event with ID {id} not found" },
                             "Invalid event ID"
                         )
@@ -245,11 +253,25 @@ namespace API.Controllers
                         .ToList()
                 };
 
-                return Ok(new SuccessResponse<GetEventResponse>(getEventResponse, "Event details"));
+                return Ok
+                (
+                    new SuccessResponse<GetEventResponse>
+                    (
+                        getEventResponse,
+                        "Event details"
+                    )
+                );
             }
             catch (Exception e)
             {
-                return BadRequest(new ErrorResponse<string>(new string[] { e.Message }, "Failed to get event details"));
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to get event details"
+                    )
+                );
             }
         }
 
@@ -267,8 +289,10 @@ namespace API.Controllers
 
             if (existingOrganizer == null)
             {
-                return NotFound(
-                    new ErrorResponse<string>(
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { $"User with ID {request.OrganizerId} not found" },
                         "Invalid user ID"
                     )
@@ -281,8 +305,10 @@ namespace API.Controllers
 
             if (existingActivity == null)
             {
-                return NotFound(
-                    new ErrorResponse<string>(
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { $"Activity with ID {request.ActivityId} not found" },
                         "Invalid activity ID"
                     )
@@ -310,12 +336,21 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to create the event. Please check your request and try again."));
+                return Conflict
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to create the event. Please check your request and try again."
+                    )
+                );
             }
 
 
-            return Ok(
-                new SuccessResponse<CreateEventResponse>(
+            return Ok
+            (
+                new SuccessResponse<CreateEventResponse>
+                (
                     new CreateEventResponse
                     {
                         Id = newEvent.Id,
@@ -344,8 +379,10 @@ namespace API.Controllers
 
                 if (eventToJoin == null)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { $"Event with ID {id} not found" },
                             "Invalid event ID"
                         )
@@ -356,8 +393,10 @@ namespace API.Controllers
 
                 if (!doesUserExist)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { $"User with ID {request.UserId} not found" },
                             "Invalid user ID"
                         )
@@ -369,8 +408,10 @@ namespace API.Controllers
 
                 if (isAlreadyParticipant)
                 {
-                    return Conflict(
-                        new ErrorResponse<string>(
+                    return Conflict
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { "You are already a participant in this event" },
                             "Duplicate participant registration"
                         )
@@ -388,8 +429,10 @@ namespace API.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return Ok(
-                    new SuccessResponse<JoinEventResponse>(
+                return Ok
+                (
+                    new SuccessResponse<JoinEventResponse>
+                    (
                          new JoinEventResponse
                          {
                              Id = eventToJoin.Id,
@@ -409,9 +452,11 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(
-                    new ErrorResponse<string>(
-                            new string[] { $"Failed to join the event: {e.Message}" },
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
+                            new string[] { e.Message },
                             "Failed to join the event"
                     )
                 );
@@ -430,8 +475,10 @@ namespace API.Controllers
 
             if (existingEvent == null)
             {
-                return NotFound(
-                    new ErrorResponse<string>(
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { $"Event with ID {id} not found" },
                         "Invalid event ID"
                     )
@@ -453,10 +500,23 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to update the event. Please check your request and try again."));
+                return Conflict
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to update the event. Please check your request and try again."
+                    )
+                );
             }
 
-            return Ok(new SuccessResponse<string>("Event updated successfully"));
+            return Ok
+            (
+                new SuccessResponse<string>
+                (
+                    "Event updated successfully"
+                )
+            );
         }
 
         [HttpDelete("{id}")]
@@ -468,8 +528,10 @@ namespace API.Controllers
 
             if (_event == null)
             {
-                return NotFound(
-                    new ErrorResponse<string>(
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { $"Event with ID {id} not found" },
                         "Invalid event ID"
                     )
@@ -492,10 +554,23 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to delete the event. Please check your request and try again."));
+                return Conflict
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to delete the event. Please check your request and try again."
+                    )
+                );
             }
 
-            return NoContent();
+            return Ok
+            (
+                new SuccessResponse<string>
+                (
+                    "Event deleted successfully"
+                )
+            );
         }
 
         [HttpDelete("{id}/leave")]
@@ -509,8 +584,10 @@ namespace API.Controllers
 
                 if (eventToLeave == null)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { $"Event with ID {id} not found" },
                             "Invalid event ID"
                         )
@@ -521,8 +598,10 @@ namespace API.Controllers
 
                 if (!doesUserExist)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { $"User with ID {request.UserId} not found" },
                             "Invalid user ID"
                         )
@@ -534,8 +613,10 @@ namespace API.Controllers
 
                 if (eventParticipant == null)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { "You are not a participant in this event" },
                             "The specified participant was not found in the event"
                         )
@@ -557,14 +638,22 @@ namespace API.Controllers
                     throw;
                 }
 
-                return NoContent();
+                return Ok
+                (
+                    new SuccessResponse<string>
+                    (
+                        "Successfully left the event"
+                    )
+                );
             }
             catch (Exception e)
             {
-                return BadRequest(
-                    new ErrorResponse<string>(
-                            new string[] { $"Failed to leave the event: {e.Message}" },
-                            "Failed to leave the event"
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to leave the event"
                     )
                 );
             }

@@ -26,10 +26,12 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GetUserRequest>>> Get(
+        public async Task<ActionResult<IEnumerable<GetUserRequest>>> Get
+        (
             [FromQuery] int page = 1,
             [FromQuery] int perPage = 10,
-            [FromQuery] string? filter = null)
+            [FromQuery] string? filter = null
+        )
         {
             if (page < 1)
             {
@@ -60,8 +62,10 @@ namespace API.Controllers
 
             var users = await query.ToListAsync();
 
-            return Ok(
-                new SuccessResponse<GetMultipleResponse<GetUserResponse>>(
+            return Ok
+            (
+                new SuccessResponse<GetMultipleResponse<GetUserResponse>>
+                (
                     new GetMultipleResponse<GetUserResponse>
                     {
                         Count = count,
@@ -95,16 +99,20 @@ namespace API.Controllers
 
             if (user == null)
             {
-                return NotFound(
-                    new ErrorResponse<string>(
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { "User not found" },
                         "Invalid user data"
                     )
                 );
             }
 
-            return Ok(
-                new SuccessResponse<GetOrganizerResponse>(
+            return Ok
+            (
+                new SuccessResponse<GetOrganizerResponse>
+                (
                     user,
                     "User with id=" + user.Id
                 )
@@ -114,10 +122,12 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("{id}/events")]
-        public async Task<ActionResult<IEnumerable<GetEventResponse>>> GetUserEvents(
+        public async Task<ActionResult<IEnumerable<GetEventResponse>>> GetUserEvents
+        (
             [FromRoute] int id,
             [FromQuery] int page = 1,
-            [FromQuery] int perPage = 10)
+            [FromQuery] int perPage = 10
+        )
         {
 
             if (page < 1)
@@ -175,8 +185,10 @@ namespace API.Controllers
                     .Take(perPage)
                     .ToListAsync();
 
-                return Ok(
-                    new SuccessResponse<GetMultipleResponse<GetEventResponse>>(
+                return Ok
+                (
+                    new SuccessResponse<GetMultipleResponse<GetEventResponse>>
+                    (
                         new GetMultipleResponse<GetEventResponse>
                         {
                             Count = count,
@@ -191,12 +203,14 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(
-                   new ErrorResponse<string>(
+                return BadRequest
+                (
+                   new ErrorResponse<string>
+                   (
                        new string[] { e.Message },
                         "Failed to get events for user with id=" + id
                    )
-               );
+                );
             }
 
         }
@@ -217,8 +231,10 @@ namespace API.Controllers
                    })
                    .ToListAsync();
 
-                return Ok(
-                    new SuccessResponse<IEnumerable<GetActivityResponse>>(
+                return Ok
+                (
+                    new SuccessResponse<IEnumerable<GetActivityResponse>>
+                    (
                         userActivities,
                         "User activities"
                     )
@@ -226,8 +242,10 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest(
-                   new ErrorResponse<string>(
+                return BadRequest
+                (
+                   new ErrorResponse<string>
+                   (
                        new string[] { e.Message },
                         "Failed to get activities for user with id=" + id
                    )
@@ -251,11 +269,14 @@ namespace API.Controllers
 
                 if (user == null)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { "User not found" },
                             "Invalid user data"
-                        ));
+                        )
+                    );
                 }
 
                 foreach (var activityId in request.ActivityIds)
@@ -264,22 +285,28 @@ namespace API.Controllers
 
                     if (existingUserActivity)
                     {
-                        return Conflict(
-                            new ErrorResponse<string>(
+                        return Conflict
+                        (
+                            new ErrorResponse<string>
+                            (
                                 new string[] { $"You have already selected your preferred interests during the initial registration. If you need to make changes, please contact support." },
                                 "Duplicate interest selection"
-                            ));
+                            )
+                        );
                     }
 
                     var activityExists = await _context.Activities.AnyAsync(a => a.Id == activityId);
 
                     if (!activityExists)
                     {
-                        return NotFound(
-                            new ErrorResponse<string>(
+                        return NotFound
+                        (
+                            new ErrorResponse<string>
+                            (
                                 new string[] { $"Activity with ID {activityId} not found" },
                                 "Invalid activity ID"
-                            ));
+                            )
+                        );
                     }
 
                     var userActivity = new UserActivity
@@ -297,11 +324,20 @@ namespace API.Controllers
                 }
                 catch (Exception e)
                 {
-                    return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to create the event. Please check your request and try again."));
+                    return Conflict
+                    (
+                        new ErrorResponse<string>
+                        (
+                            new string[] { e.Message },
+                            "Failed to create the event. Please check your request and try again."
+                        )
+                    );
                 }
 
-                return Ok(
-                    new SuccessResponse<User>(
+                return Ok
+                (
+                    new SuccessResponse<User>
+                    (
                         user,
                         "User preferences updated successfully"
                     )
@@ -309,7 +345,14 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest($"Failed to update user preferences: {e.Message}");
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to update user preferences"
+                    )
+                );
             }
         }
 
@@ -329,11 +372,14 @@ namespace API.Controllers
 
                 if (user == null)
                 {
-                    return NotFound(
-                        new ErrorResponse<string>(
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
                             new string[] { "User not found" },
                             "Invalid user data"
-                        ));
+                        )
+                    );
                 }
 
                 user.UserActivities.Clear();
@@ -344,11 +390,14 @@ namespace API.Controllers
 
                     if (!activityExists)
                     {
-                        return NotFound(
-                            new ErrorResponse<string>(
+                        return NotFound
+                        (
+                            new ErrorResponse<string>
+                            (
                                 new string[] { $"Activity with ID {activityId} not found" },
                                 "Invalid activity ID"
-                            ));
+                            )
+                        );
                     }
 
                     if (!user.UserActivities.Any(ua => ua.ActivityId == activityId))
@@ -369,19 +418,34 @@ namespace API.Controllers
                 }
                 catch (Exception e)
                 {
-                    return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to update user activities. Please check your request and try again."));
+                    return Conflict
+                    (
+                        new ErrorResponse<string>
+                        (
+                            new string[] { e.Message },
+                            "Failed to update user activities. Please check your request and try again."
+                        )
+                    );
                 }
 
-                return Ok(
-                    new SuccessResponse<User>(
-                        user,
+                return Ok
+                (
+                    new SuccessResponse<string>
+                    (
                         "User preferences updated successfully"
                     )
                 );
             }
             catch (Exception e)
             {
-                return BadRequest($"Failed to update user preferences: {e.Message}");
+                return BadRequest
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to update user preferences"
+                    )
+                );
             }
         }
 
@@ -392,8 +456,10 @@ namespace API.Controllers
 
             if (user == null)
             {
-                return NotFound(
-                    new ErrorResponse<string>(
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
                         new string[] { "User not found" },
                         "Invalid user data"
                     )
@@ -408,13 +474,21 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return Conflict(new ErrorResponse<string>(new string[] { e.Message }, "Failed to delete the event. Please check your request and try again."));
+                return Conflict
+                (
+                    new ErrorResponse<string>
+                    (
+                        new string[] { e.Message },
+                        "Failed to delete the event. Please check your request and try again."
+                    )
+                );
             }
 
-            return Ok(
-                new SuccessResponse<User>(
-                    user,
-                    "User with id=" + user.Id + " has been deleted"
+            return Ok
+            (
+                new SuccessResponse<string>
+                (
+                    "User deleted successfully"
                 )
             );
         }

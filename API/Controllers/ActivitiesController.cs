@@ -17,10 +17,11 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GetActivityResponse>>> Get(
-        [FromQuery] int page = 1,
-        [FromQuery] int perPage = 10
-)
+        public async Task<ActionResult<IEnumerable<GetActivityResponse>>> Get
+        (
+            [FromQuery] int page = 1,
+            [FromQuery] int perPage = 10
+        )
         {
             IQueryable<GetActivityResponse> query = _context.Activities
                 .Select(a => new GetActivityResponse
@@ -37,8 +38,10 @@ namespace API.Controllers
                 .Take(perPage)
                 .ToListAsync();
 
-            return Ok(
-                new SuccessResponse<GetMultipleResponse<GetActivityResponse>>(
+            return Ok
+            (
+                new SuccessResponse<GetMultipleResponse<GetActivityResponse>>
+                (
                     new GetMultipleResponse<GetActivityResponse>
                     {
                         Count = await _context.Activities.CountAsync(),
