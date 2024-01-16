@@ -11,7 +11,8 @@ public partial class EventParticipant
     // TODO: we currently don't use this
     public string? Status { get; set; } = "going";
 
-    public DateTime? StatusChangedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public virtual Event Event { get; set; } = null!;
 

@@ -117,7 +117,7 @@ public partial class GetTogetherContext : DbContext
             entity.Property(e => e.Status)
                 .HasColumnType("enum('going','maybe','not going')")
                 .HasColumnName("status");
-            entity.Property(e => e.StatusChangedAt)
+            entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("statusChangedAt");
 
@@ -140,7 +140,7 @@ public partial class GetTogetherContext : DbContext
 
             entity.HasIndex(e => e.ParticipantId, "Notifications_Participant");
 
-            entity.HasIndex(e => e.UserId, "Notifications_User");
+            entity.HasIndex(e => e.OrganizerId, "Notifications_Organizer");
 
             entity.Property(e => e.Id)
                 .HasColumnType("int(11)")
@@ -152,12 +152,11 @@ public partial class GetTogetherContext : DbContext
                 .HasColumnType("int(11)")
                 .HasColumnName("participantID");
             entity.Property(e => e.Status)
-                .HasDefaultValueSql("'not seen'")
-                .HasColumnType("enum('seen','not seen','deleted')")
+                .HasColumnType("enum('joined','updated','deleted')")
                 .HasColumnName("status");
-            entity.Property(e => e.UserId)
+            entity.Property(e => e.OrganizerId)
                 .HasColumnType("int(11)")
-                .HasColumnName("userID");
+                .HasColumnName("organizerID");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.EventId)
@@ -167,10 +166,10 @@ public partial class GetTogetherContext : DbContext
                 .HasForeignKey(d => d.ParticipantId)
                 .HasConstraintName("Notifications_Participant");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Notifications)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("Notifications_User");
+            entity.HasOne(d => d.Organizer).WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.OrganizerId)
+                .OnDelete(DeleteBehavior.ClientCascade)
+                .HasConstraintName("Notifications_Organizer");
         });
 
         modelBuilder.Entity<User>(entity =>

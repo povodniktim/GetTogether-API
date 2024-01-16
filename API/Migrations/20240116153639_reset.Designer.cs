@@ -3,6 +3,7 @@ using System;
 using API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(GetTogetherContext))]
-    partial class GetTogetherContextModelSnapshot : ModelSnapshot
+    [Migration("20240116153639_reset")]
+    partial class reset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,10 +158,6 @@ namespace API.Migrations
                         .HasColumnType("int(11)")
                         .HasColumnName("eventID");
 
-                    b.Property<int>("OrganizerId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("organizerID");
-
                     b.Property<int?>("ParticipantId")
                         .HasColumnType("int(11)")
                         .HasColumnName("participantID");
@@ -167,14 +166,18 @@ namespace API.Migrations
                         .HasColumnType("enum('joined','updated','deleted')")
                         .HasColumnName("status");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("userID");
+
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
                     b.HasIndex(new[] { "EventId" }, "Notifications_Event");
 
-                    b.HasIndex(new[] { "OrganizerId" }, "Notifications_Organizer");
-
                     b.HasIndex(new[] { "ParticipantId" }, "Notifications_Participant");
+
+                    b.HasIndex(new[] { "UserId" }, "Notifications_User");
 
                     b.ToTable("Notifications");
                 });
@@ -318,23 +321,22 @@ namespace API.Migrations
                         .HasForeignKey("EventId")
                         .HasConstraintName("Notifications_Event");
 
-                    b.HasOne("API.Models.User", "Organizer")
-                        .WithMany("Notifications")
-                        .HasForeignKey("OrganizerId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired()
-                        .HasConstraintName("Notifications_Organizer");
-
                     b.HasOne("API.Models.EventParticipant", "Participant")
                         .WithMany("Notifications")
                         .HasForeignKey("ParticipantId")
                         .HasConstraintName("Notifications_Participant");
 
+                    b.HasOne("API.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("Notifications_User");
+
                     b.Navigation("Event");
 
-                    b.Navigation("Organizer");
-
                     b.Navigation("Participant");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API.Models.UserActivity", b =>
