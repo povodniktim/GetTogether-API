@@ -4,7 +4,7 @@ namespace API.Models.Responses.Notifications
 {
     public class GetNotificationResponse
     {
-        public int UserId { get; set; }
+        public int OrganizerId { get; set; }
 
         public int? EventId { get; set; }
 
@@ -12,7 +12,7 @@ namespace API.Models.Responses.Notifications
 
         public string? Status { get; set; }
 
-        public GetUserResponse User { get; set; }
+        public GetUserResponse Organizer { get; set; }
 
         public GetUserResponse Participant { get; set; }
     }
