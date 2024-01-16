@@ -19,42 +19,37 @@ namespace API.Controllers
         }
 
         [HttpGet]
+        [Route("{userId}")]
         public async Task<ActionResult<IEnumerable<GetNotificationRequest>>> Get
         (
+            [FromRoute] int userId,
             [FromQuery] int page = 1,
             [FromQuery] int perPage = 10
         )
         {
             try
             {
-                if (page < 1)
-                {
-                    page = 1;
-                }
-
-                IQueryable<GetNotificationResponse> query = _context.Notifications
-                    .Include(n => n.Participant)
-                    .Select(n => new GetNotificationResponse
-                    {
+                var query = _context.Notifications
+                     .Include(p => p.Participant)
+                     .Include(u => u.User)
+                     .Where(n => (n.UserId == userId && n.Status == "joined") || (n.ParticipantId == userId && n.Status == "updated"))
+                     .Select(n => new GetNotificationResponse
+                     {
                         UserId = n.UserId,
                         EventId = n.EventId,
                         ParticipantId = n.ParticipantId,
                         Status = n.Status,
-                        User = new GetUserResponse
+                        User = _context.Users.Where(u => u.Id == n.UserId).Select(u => new GetUserResponse
                         {
-                            Id = n.User.Id,
-                            FirstName = n.User.FirstName,
-                            LastName = n.User.LastName,
-                            Email = n.User.Email,
-                            CreatedAt = n.User.CreatedAt,
-                            ProfileImageUrl = n.User.ProfileImageUrl
-                        },
-                        Participant = new GetUserResponse
+                            Id = u.Id,
+                            FirstName = u.FirstName
+                        }).FirstOrDefault(),
+                        Participant = _context.Users.Where(u => u.Id == n.ParticipantId).Select(u => new GetUserResponse
                         {
-                            Id = n.Participant.Id,
-                            FirstName = n.Participant.Participant.FirstName
-                        }
-                    });
+                            Id = u.Id,
+                            FirstName = u.FirstName
+                        }).FirstOrDefault()
+                     });
 
                 var notifications = await query
                     .Skip((page - 1) * perPage)
