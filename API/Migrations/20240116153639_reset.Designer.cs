@@ -3,6 +3,7 @@ using System;
 using API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(GetTogetherContext))]
-    partial class GetTogetherContextModelSnapshot : ModelSnapshot
+    [Migration("20240116153639_reset")]
+    partial class reset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +46,7 @@ namespace API.Migrations
                     b.HasKey("Id")
                         .HasName("PRIMARY");
 
-                    b.ToTable("Activities", (string)null);
+                    b.ToTable("Activities");
                 });
 
             modelBuilder.Entity("API.Models.Event", b =>
@@ -105,7 +108,7 @@ namespace API.Migrations
 
                     b.HasIndex(new[] { "OrganizerId" }, "Event_Organizer");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("API.Models.EventParticipant", b =>
@@ -141,7 +144,7 @@ namespace API.Migrations
 
                     b.HasIndex(new[] { "ParticipantId" }, "EventParticipants_Participant");
 
-                    b.ToTable("EventParticipants", (string)null);
+                    b.ToTable("EventParticipants");
                 });
 
             modelBuilder.Entity("API.Models.Notification", b =>
@@ -176,7 +179,7 @@ namespace API.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "Notifications_User");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("API.Models.User", b =>
@@ -243,7 +246,7 @@ namespace API.Migrations
                     b.HasIndex(new[] { "Email" }, "email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("API.Models.UserActivity", b =>
@@ -268,7 +271,7 @@ namespace API.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "userActivities_user_fk");
 
-                    b.ToTable("UserActivities", (string)null);
+                    b.ToTable("UserActivities");
                 });
 
             modelBuilder.Entity("API.Models.Event", b =>

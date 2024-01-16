@@ -379,10 +379,8 @@ namespace API.Controllers
 
                 if (eventToJoin == null)
                 {
-                    return NotFound
-                    (
-                        new ErrorResponse<string>
-                        (
+                    return NotFound(
+                        new ErrorResponse<string>(
                             new string[] { $"Event with ID {id} not found" },
                             "Invalid event ID"
                         )
@@ -393,10 +391,8 @@ namespace API.Controllers
 
                 if (!doesUserExist)
                 {
-                    return NotFound
-                    (
-                        new ErrorResponse<string>
-                        (
+                    return NotFound(
+                        new ErrorResponse<string>(
                             new string[] { $"User with ID {request.UserId} not found" },
                             "Invalid user ID"
                         )
@@ -408,10 +404,8 @@ namespace API.Controllers
 
                 if (isAlreadyParticipant)
                 {
-                    return Conflict
-                    (
-                        new ErrorResponse<string>
-                        (
+                    return Conflict(
+                        new ErrorResponse<string>(
                             new string[] { "You are already a participant in this event" },
                             "Duplicate participant registration"
                         )
@@ -422,17 +416,32 @@ namespace API.Controllers
                 {
                     ParticipantId = request.UserId,
                     EventId = id,
-                    StatusChangedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow
                 };
 
                 eventToJoin.EventParticipants.Add(eventParticipant);
 
                 await _context.SaveChangesAsync();
 
-                return Ok
-                (
-                    new SuccessResponse<JoinEventResponse>
-                    (
+                // --- Notifications ---
+                var organizerId = eventToJoin.OrganizerId;
+
+                if (organizerId != request.UserId)
+                {
+                    var notification = new Notification
+                    {
+                        UserId = organizerId,
+                        EventId = id,
+                        ParticipantId = request.UserId,
+                        Status = "joined"
+                    };
+
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(
+                    new SuccessResponse<JoinEventResponse>(
                          new JoinEventResponse
                          {
                              Id = eventToJoin.Id,
@@ -452,12 +461,10 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
-                return BadRequest
-                (
-                    new ErrorResponse<string>
-                    (
-                            new string[] { e.Message },
-                            "Failed to join the event"
+                return BadRequest(
+                    new ErrorResponse<string>(
+                        new string[] { e.Message },
+                        "Failed to join the event"
                     )
                 );
             }
