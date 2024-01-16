@@ -39,22 +39,28 @@ namespace API.Controllers
                          EventId = n.EventId,
                          ParticipantId = n.ParticipantId,
                          Status = n.Status,
-                         Organizer = _context.Users.Where(o => o.Id == n.OrganizerId).Select(o => new GetUserResponse
-                         {
-                             Id = o.Id,
-                             FirstName = o.FirstName,
-                             LastName = o.LastName,
-                             CreatedAt = o.CreatedAt,
-                             ProfileImageUrl = o.ProfileImageUrl
-                         }).FirstOrDefault(),
-                         Participant = _context.Users.Where(u => u.Id == n.ParticipantId).Select(u => new GetUserResponse
-                         {
-                             Id = u.Id,
-                             FirstName = u.FirstName,
-                             LastName = u.LastName,
-                             CreatedAt = u.CreatedAt,
-                             ProfileImageUrl = u.ProfileImageUrl
-                         }).FirstOrDefault()
+                         Organizer = _context.Users
+                        .Where(o => o.Id == n.OrganizerId)
+                        .Select(o => new GetUserResponse
+                        {
+                            Id = o.Id,
+                            FirstName = o.FirstName,
+                            LastName = o.LastName,
+                            CreatedAt = o.CreatedAt,
+                            ProfileImageUrl = o.ProfileImageUrl
+                        })
+                        .FirstOrDefault() ?? new GetUserResponse(),
+                         Participant = _context.Users
+                        .Where(u => u.Id == n.ParticipantId)
+                        .Select(u => new GetUserResponse
+                        {
+                            Id = u.Id,
+                            FirstName = u.FirstName,
+                            LastName = u.LastName,
+                            CreatedAt = u.CreatedAt,
+                            ProfileImageUrl = u.ProfileImageUrl
+                        })
+                        .FirstOrDefault() ?? new GetUserResponse()
                      });
 
                 var notifications = await query
