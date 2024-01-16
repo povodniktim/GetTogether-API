@@ -31,24 +31,30 @@ namespace API.Controllers
             {
                 var query = _context.Notifications
                      .Include(p => p.Participant)
-                     .Include(u => u.User)
-                     .Where(n => (n.UserId == userId && n.Status == "joined") || (n.ParticipantId == userId && n.Status == "updated"))
+                     .Include(o => o.Organizer)
+                     .Where(n => (n.OrganizerId == userId && n.Status == "joined") || (n.ParticipantId == userId && n.Status == "updated"))
                      .Select(n => new GetNotificationResponse
                      {
-                        UserId = n.UserId,
-                        EventId = n.EventId,
-                        ParticipantId = n.ParticipantId,
-                        Status = n.Status,
-                        User = _context.Users.Where(u => u.Id == n.UserId).Select(u => new GetUserResponse
-                        {
-                            Id = u.Id,
-                            FirstName = u.FirstName
-                        }).FirstOrDefault(),
-                        Participant = _context.Users.Where(u => u.Id == n.ParticipantId).Select(u => new GetUserResponse
-                        {
-                            Id = u.Id,
-                            FirstName = u.FirstName
-                        }).FirstOrDefault()
+                         OrganizerId = n.OrganizerId,
+                         EventId = n.EventId,
+                         ParticipantId = n.ParticipantId,
+                         Status = n.Status,
+                         Organizer = _context.Users.Where(o => o.Id == n.OrganizerId).Select(o => new GetUserResponse
+                         {
+                             Id = o.Id,
+                             FirstName = o.FirstName,
+                             LastName = o.LastName,
+                             CreatedAt = o.CreatedAt,
+                             ProfileImageUrl = o.ProfileImageUrl
+                         }).FirstOrDefault(),
+                         Participant = _context.Users.Where(u => u.Id == n.ParticipantId).Select(u => new GetUserResponse
+                         {
+                             Id = u.Id,
+                             FirstName = u.FirstName,
+                             LastName = u.LastName,
+                             CreatedAt = u.CreatedAt,
+                             ProfileImageUrl = u.ProfileImageUrl
+                         }).FirstOrDefault()
                      });
 
                 var notifications = await query

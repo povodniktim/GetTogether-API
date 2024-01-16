@@ -430,7 +430,7 @@ namespace API.Controllers
                 {
                     var notification = new Notification
                     {
-                        UserId = organizerId,
+                        OrganizerId = organizerId,
                         EventId = id,
                         ParticipantId = request.UserId,
                         Status = "joined"

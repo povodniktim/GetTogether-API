@@ -3,6 +3,7 @@ using System;
 using API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(GetTogetherContext))]
-    partial class GetTogetherContextModelSnapshot : ModelSnapshot
+    [Migration("20240116202247_Notifications_UserId_to_OrganizerId")]
+    partial class Notifications_UserId_to_OrganizerId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,7 +160,7 @@ namespace API.Migrations
 
                     b.Property<int>("OrganizerId")
                         .HasColumnType("int(11)")
-                        .HasColumnName("organizerID");
+                        .HasColumnName("userID");
 
                     b.Property<int?>("ParticipantId")
                         .HasColumnType("int(11)")
@@ -172,9 +175,9 @@ namespace API.Migrations
 
                     b.HasIndex(new[] { "EventId" }, "Notifications_Event");
 
-                    b.HasIndex(new[] { "OrganizerId" }, "Notifications_Organizer");
-
                     b.HasIndex(new[] { "ParticipantId" }, "Notifications_Participant");
+
+                    b.HasIndex(new[] { "OrganizerId" }, "Notifications_User");
 
                     b.ToTable("Notifications");
                 });
@@ -318,12 +321,11 @@ namespace API.Migrations
                         .HasForeignKey("EventId")
                         .HasConstraintName("Notifications_Event");
 
-                    b.HasOne("API.Models.User", "Organizer")
+                    b.HasOne("API.Models.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("OrganizerId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired()
-                        .HasConstraintName("Notifications_Organizer");
+                        .HasConstraintName("Notifications_User");
 
                     b.HasOne("API.Models.EventParticipant", "Participant")
                         .WithMany("Notifications")
@@ -332,9 +334,9 @@ namespace API.Migrations
 
                     b.Navigation("Event");
 
-                    b.Navigation("Organizer");
-
                     b.Navigation("Participant");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API.Models.UserActivity", b =>
