@@ -34,7 +34,7 @@ namespace API.Controllers
                 var query = _context.Notifications
                      .Include(p => p.Participant)
                      .Include(o => o.Organizer)
-                     .Where(n => (n.OrganizerId == userId && n.Status == "joined") || (n.ParticipantId == userId && n.Status == "updated"))
+                     .Where(n => (n.OrganizerId == userId && n.Status == "joined") || (n.ParticipantId == userId && n.Status == "updated") || (n.ParticipantId == userId && n.Status == "left"))
                      .Select(n => new GetNotificationResponse
                      {
                          OrganizerId = n.OrganizerId,
