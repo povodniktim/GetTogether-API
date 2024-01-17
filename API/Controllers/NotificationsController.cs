@@ -1,5 +1,7 @@
 ﻿using API.Models.Requests.Notifications;
 using API.Models.Response.User;
+using API.Models.Responses.Activity;
+using API.Models.Responses.Event;
 using API.Models.Responses.Notifications;
 using API.Responses;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +41,7 @@ namespace API.Controllers
                          EventId = n.EventId,
                          ParticipantId = n.ParticipantId,
                          Status = n.Status,
+
                          Organizer = _context.Users
                         .Where(o => o.Id == n.OrganizerId)
                         .Select(o => new GetUserResponse
@@ -50,6 +53,7 @@ namespace API.Controllers
                             ProfileImageUrl = o.ProfileImageUrl
                         })
                         .FirstOrDefault() ?? new GetUserResponse(),
+
                          Participant = _context.Users
                         .Where(u => u.Id == n.ParticipantId)
                         .Select(u => new GetUserResponse
@@ -60,7 +64,25 @@ namespace API.Controllers
                             CreatedAt = u.CreatedAt,
                             ProfileImageUrl = u.ProfileImageUrl
                         })
-                        .FirstOrDefault() ?? new GetUserResponse()
+                        .FirstOrDefault() ?? new GetUserResponse(),
+
+                         Event = _context.Events
+                        .Where(e => e.Id == n.EventId)
+                        .Select(e => new GetEventSimpleResponse
+                        {
+                            Id = e.Id,
+                            Title = e.Title,
+                            Activity = _context.Activities
+                            .Where(a => a.Id == e.ActivityId)
+                            .Select(a => new GetActivityResponse
+                            {
+                                Id = a.Id,
+                                Name = a.Name,
+                                IconClassName = a.IconClassName
+                            })
+                            .FirstOrDefault() ?? new GetActivityResponse()
+                        })
+                        .FirstOrDefault() ?? new GetEventSimpleResponse()
                      });
 
                 var notifications = await query

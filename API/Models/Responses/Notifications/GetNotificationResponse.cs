@@ -1,4 +1,5 @@
 ﻿using API.Models.Response.User;
+using API.Models.Responses.Event;
 
 namespace API.Models.Responses.Notifications
 {
@@ -15,5 +16,7 @@ namespace API.Models.Responses.Notifications
         public GetUserResponse Organizer { get; set; }
 
         public GetUserResponse Participant { get; set; }
+
+        public GetEventSimpleResponse Event { get; set; }
     }
 }
