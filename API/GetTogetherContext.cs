@@ -155,7 +155,7 @@ public partial class GetTogetherContext : DbContext
                 .HasColumnType("int(11)")
                 .HasColumnName("participantID");
             entity.Property(e => e.Status)
-                .HasColumnType("enum('joined','updated','deleted')")
+                .HasColumnType("enum('joined','updated','left')")
                 .HasColumnName("status");
             entity.Property(e => e.OrganizerId)
                 .HasColumnType("int(11)")

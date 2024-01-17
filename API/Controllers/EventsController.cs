@@ -640,6 +640,24 @@ namespace API.Controllers
                 {
                     await _context.SaveChangesAsync();
                     transaction.Commit();
+
+                    // --- Notifications ---
+                    var organizerId = eventToLeave.OrganizerId;
+
+                    if (organizerId != request.UserId)
+                    {
+                        var notification = new Notification
+                        {
+                            OrganizerId = organizerId,
+                            EventId = id,
+                            ParticipantId = request.UserId,
+                            CreatedAt = DateTime.UtcNow,
+                            Status = "left"
+                        };
+
+                        _context.Notifications.Add(notification);
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (Exception)
                 {
