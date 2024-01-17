@@ -10,5 +10,6 @@
         public string? ProfileImageUrl { get; set; }
         public int CreatedEventsCount { get; set; }
         public int AttendedEventsCount { get; set; }
+        public int NotificationsCount { get; set; }
     }
 }

@@ -10,6 +10,8 @@ public partial class Notification
 
     public int? ParticipantId { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
     public string? Status { get; set; }
 
     public virtual Event? Event { get; set; }

@@ -41,7 +41,7 @@ namespace API.Controllers
                          EventId = n.EventId,
                          ParticipantId = n.ParticipantId,
                          Status = n.Status,
-
+                         CreatedAt = n.CreatedAt,
                          Organizer = _context.Users
                         .Where(o => o.Id == n.OrganizerId)
                         .Select(o => new GetUserResponse
@@ -49,6 +49,7 @@ namespace API.Controllers
                             Id = o.Id,
                             FirstName = o.FirstName,
                             LastName = o.LastName,
+                            Email = o.Email,
                             CreatedAt = o.CreatedAt,
                             ProfileImageUrl = o.ProfileImageUrl
                         })
@@ -61,6 +62,7 @@ namespace API.Controllers
                             Id = u.Id,
                             FirstName = u.FirstName,
                             LastName = u.LastName,
+                            Email = u.Email,
                             CreatedAt = u.CreatedAt,
                             ProfileImageUrl = u.ProfileImageUrl
                         })

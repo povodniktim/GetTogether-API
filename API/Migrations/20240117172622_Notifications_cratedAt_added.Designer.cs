@@ -3,6 +3,7 @@ using System;
 using API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(GetTogetherContext))]
-    partial class GetTogetherContextModelSnapshot : ModelSnapshot
+    [Migration("20240117172622_Notifications_cratedAt_added")]
+    partial class Notifications_cratedAt_added
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,7 +120,7 @@ namespace API.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime")
-                        .HasColumnName("createdAt");
+                        .HasColumnName("statusChangedAt");
 
                     b.Property<int>("EventId")
                         .HasColumnType("int(11)")
@@ -132,8 +135,7 @@ namespace API.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("updatedAt");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id")
                         .HasName("PRIMARY");

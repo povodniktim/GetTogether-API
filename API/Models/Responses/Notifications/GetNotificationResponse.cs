@@ -11,7 +11,9 @@ namespace API.Models.Responses.Notifications
 
         public int? ParticipantId { get; set; }
 
-        public string? Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        public string Status { get; set; }
 
         public GetUserResponse Organizer { get; set; }
 

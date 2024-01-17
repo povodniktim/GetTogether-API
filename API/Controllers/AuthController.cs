@@ -174,7 +174,8 @@ namespace API.Controllers.Auth
                     ProfileImageUrl = user.ProfileImageUrl,
                     CreatedAt = user.CreatedAt,
                     CreatedEventsCount = _context.Events.Count(e => e.OrganizerId == user.Id),
-                    AttendedEventsCount = _context.EventParticipants.Count(ep => ep.ParticipantId == user.Id)
+                    AttendedEventsCount = _context.EventParticipants.Count(ep => ep.ParticipantId == user.Id),
+                    NotificationsCount = _context.Notifications.Count(n => n.ParticipantId == user.Id),
                 };
 
                 return Ok

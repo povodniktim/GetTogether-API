@@ -416,6 +416,7 @@ namespace API.Controllers
                 {
                     ParticipantId = request.UserId,
                     EventId = id,
+                    CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
@@ -433,6 +434,7 @@ namespace API.Controllers
                         OrganizerId = organizerId,
                         EventId = id,
                         ParticipantId = request.UserId,
+                        CreatedAt = DateTime.UtcNow,
                         Status = "joined"
                     };
 

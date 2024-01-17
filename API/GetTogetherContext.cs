@@ -119,7 +119,10 @@ public partial class GetTogetherContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
-                .HasColumnName("statusChangedAt");
+                .HasColumnName("createdAt");
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updatedAt");
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventParticipants)
                 .HasForeignKey(d => d.EventId)
