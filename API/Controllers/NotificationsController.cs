@@ -34,7 +34,7 @@ namespace API.Controllers
                 var query = _context.Notifications
                      .Include(p => p.Participant)
                      .Include(o => o.Organizer)
-                     .Where(n => (n.OrganizerId == userId && n.Status == "joined") || (n.ParticipantId == userId && n.Status == "updated") || (n.ParticipantId == userId && n.Status == "left"))
+                     .Where(n => (n.OrganizerId == userId && n.Status == "joined") || (n.OrganizerId == userId && n.Status == "left") || (n.ParticipantId == userId && n.Status == "updated"))
                      .Select(n => new GetNotificationResponse
                      {
                          OrganizerId = n.OrganizerId,
@@ -90,6 +90,7 @@ namespace API.Controllers
                 var notifications = await query
                     .Skip((page - 1) * perPage)
                     .Take(perPage)
+                    .OrderByDescending(n => n.CreatedAt)
                     .ToListAsync();
 
                 return Ok
