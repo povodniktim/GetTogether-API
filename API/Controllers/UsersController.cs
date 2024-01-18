@@ -1,5 +1,6 @@
 using API.Models;
 using API.Models.Requests.Activity;
+using API.Models.Requests.Event;
 using API.Models.Requests.User;
 using API.Models.Response.User;
 using API.Models.Responses.Activity;
@@ -122,7 +123,7 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("{id}/events")]
-        public async Task<ActionResult<IEnumerable<GetEventResponse>>> GetUserEvents
+        public async Task<ActionResult<IEnumerable<GetEventResponse>>> GetUsersEvents
         (
             [FromRoute] int id,
             [FromQuery] int page = 1,
@@ -217,11 +218,11 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("{id}/activities")]
-        public async Task<ActionResult<IEnumerable<GetActivityRequest>>> GetUserActivities(int id)
+        public async Task<ActionResult<IEnumerable<GetActivityRequest>>> GetUsersActivities(int id)
         {
             try
             {
-                var userActivities = await _context.UserActivities
+                var usersActivities = await _context.UserActivities
                    .Where(ua => ua.UserId == id)
                    .Select(ua => new GetActivityResponse
                    {
@@ -235,8 +236,8 @@ namespace API.Controllers
                 (
                     new SuccessResponse<IEnumerable<GetActivityResponse>>
                     (
-                        userActivities,
-                        "User activities"
+                        usersActivities,
+                        "List of activities that user is interested in"
                     )
                 );
             }
@@ -248,6 +249,106 @@ namespace API.Controllers
                    (
                        new string[] { e.Message },
                         "Failed to get activities for user with id=" + id
+                   )
+               );
+            }
+        }
+
+        [HttpGet]
+        [Route("{id}/events/attended")]
+        public async Task<ActionResult<IEnumerable<GetEventRequest>>> GetUsersAttendedEvents
+        (
+           [FromRoute] int id,
+           [FromQuery] int page = 1,
+           [FromQuery] int perPage = 10
+        )
+        {
+            if (page < 1)
+            {
+                page = 1;
+            }
+
+            var doesUserExist = await _context.Users.AnyAsync(u => u.Id == id);
+            if (!doesUserExist)
+            {
+                return NotFound
+                (
+                    new ErrorResponse<string>
+                    (
+                    new string[] { "User not found" },
+                    "Invalid user data"
+                    )
+                );
+            }
+
+            try
+            {
+                IQueryable<GetEventResponse> usersAttendedEvents = _context.Events
+                    .Include(e => e.Organizer)
+                    .Include(ep => ep.EventParticipants)
+                    .Where(e => e.EventParticipants.Any(ep => ep.ParticipantId == id))
+                    .OrderBy(e => e.Date)
+                    .Select(e => new GetEventResponse
+                    {
+                        Id = e.Id,
+                        Title = e.Title,
+                        CreatedAt = e.CreatedAt,
+                        Description = e.Description,
+                        Date = e.Date,
+                        Location = e.Location,
+                        MaxParticipants = e.MaxParticipants,
+                        Visibility = e.Visibility ?? "public",
+                        Organizer = new GetOrganizerResponse
+                        {
+                            Id = e.Organizer.Id,
+                            FirstName = e.Organizer.FirstName,
+                            LastName = e.Organizer.LastName,
+                            Email = e.Organizer.Email,
+                            CreatedAt = e.Organizer.CreatedAt,
+                            ProfileImageUrl = e.Organizer.ProfileImageUrl
+                        },
+                        Activity = new GetActivityResponse
+                        {
+                            Id = e.Activity.Id,
+                            Name = e.Activity.Name,
+                            IconClassName = e.Activity.IconClassName
+                        },
+                        Participants = _context.EventParticipants
+                            .Where(ep => ep.EventId == e.Id)
+                            .Select(ep => new GetParticipantResponse
+                            {
+                                Id = ep.ParticipantId,
+                                FirstName = ep.Participant.FirstName,
+                                LastName = ep.Participant.LastName,
+                                ProfileImageUrl = ep.Participant.ProfileImageUrl
+                            })
+                            .ToList()
+                    });
+
+                int count = await usersAttendedEvents.CountAsync();
+
+                var events = await usersAttendedEvents
+                    .Skip((page - 1) * perPage)
+                    .Take(perPage)
+                    .ToListAsync();
+
+                return Ok
+                (
+                    new SuccessResponse<IEnumerable<GetEventResponse>>
+                    (
+                        usersAttendedEvents,
+                        "List of events that user has attended"
+                    )
+                );
+            }
+            catch (Exception e)
+            {
+                return BadRequest
+                (
+                   new ErrorResponse<string>
+                   (
+                       new string[] { e.Message },
+                        "Failed to get events for user with id=" + id
                    )
                );
             }
