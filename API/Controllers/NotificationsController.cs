@@ -31,6 +31,20 @@ namespace API.Controllers
         {
             try
             {
+                var doesUserExist = await _context.Users.AnyAsync(u => u.Id == userId);
+
+                if (!doesUserExist)
+                {
+                    return NotFound
+                    (
+                        new ErrorResponse<string>
+                        (
+                            new string[] { $"User with ID {userId} not found" },
+                            "Invalid user ID"
+                        )
+                    );
+                }
+
                 var query = _context.Notifications
                      .Include(p => p.Participant)
                      .Include(o => o.Organizer)
@@ -51,7 +65,10 @@ namespace API.Controllers
                             LastName = o.LastName,
                             Email = o.Email,
                             CreatedAt = o.CreatedAt,
-                            ProfileImageUrl = o.ProfileImageUrl
+                            ProfileImageUrl = o.ProfileImageUrl,
+                            CreatedEventsCount = _context.Events.Count(e => e.OrganizerId == o.Id),
+                            AttendedEventsCount = _context.EventParticipants.Count(ep => ep.ParticipantId == o.Id),
+                            NotificationsCount = _context.Notifications.Count(n => n.OrganizerId == o.Id)
                         })
                         .FirstOrDefault() ?? new GetUserResponse(),
 
@@ -64,7 +81,10 @@ namespace API.Controllers
                             LastName = u.LastName,
                             Email = u.Email,
                             CreatedAt = u.CreatedAt,
-                            ProfileImageUrl = u.ProfileImageUrl
+                            ProfileImageUrl = u.ProfileImageUrl,
+                            CreatedEventsCount = _context.Events.Count(e => e.OrganizerId == u.Id),
+                            AttendedEventsCount = _context.EventParticipants.Count(ep => ep.ParticipantId == u.Id),
+                            NotificationsCount = _context.Notifications.Count(n => n.OrganizerId == u.Id)
                         })
                         .FirstOrDefault() ?? new GetUserResponse(),
 
@@ -99,7 +119,7 @@ namespace API.Controllers
                     (
                         new GetMultipleResponse<GetNotificationResponse>
                         {
-                            Count = await _context.Notifications.CountAsync(),
+                            Count = _context.Notifications.Count(n => n.OrganizerId == userId),
                             Page = page,
                             PerPage = perPage,
                             Collection = notifications
