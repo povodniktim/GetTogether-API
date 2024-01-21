@@ -1,8 +1,7 @@
-using System.Text;
-using System.Web;
 using API.Helpers;
 using API.Models;
 using API.Models.Responses.Auth;
+using System.Web;
 
 namespace API.Services;
 
@@ -69,7 +68,8 @@ public class AuthService
             ProfileImageUrl = targetUser.ProfileImageUrl,
             CreatedAt = targetUser.CreatedAt,
             CreatedEventsCount = isNewUser ? 0 : _context.Events.Count(e => e.OrganizerId == targetUser.Id),
-            AttendedEventsCount = isNewUser ? 0 : _context.EventParticipants.Count(ep => ep.ParticipantId == targetUser.Id)
+            AttendedEventsCount = isNewUser ? 0 : _context.EventParticipants.Count(ep => ep.ParticipantId == targetUser.Id),
+            NotificationsCount = isNewUser ? 0 : _context.Notifications.Count(n => n.OrganizerId == targetUser.Id)
         };
 
     }
