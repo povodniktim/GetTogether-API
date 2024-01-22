@@ -248,6 +248,7 @@ namespace API.Controllers
                             Id = ep.ParticipantId,
                             FirstName = ep.Participant.FirstName,
                             LastName = ep.Participant.LastName,
+                            CreatedAt = ep.Participant.CreatedAt,
                             ProfileImageUrl = ep.Participant.ProfileImageUrl
                         })
                         .ToList()
